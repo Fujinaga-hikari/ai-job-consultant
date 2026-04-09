@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-brand: #e63946;
+  --color-brand-light: #ff7f7f;
+  --color-brand-bg: #fff5f5;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-noto-sans-jp), "Helvetica Neue", Arial,
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+  --color-brand: var(--color-brand);
+  --color-brand-light: var(--color-brand-light);
+  --color-brand-bg: var(--color-brand-bg);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Form inputs */
+.input-field {
+  @apply w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800
+    transition-colors duration-200
+    focus:border-[#e63946] focus:ring-2 focus:ring-[#e63946]/20 focus:outline-none;
+}
+
+/* Primary button */
+.btn-primary {
+  @apply rounded-full bg-[#ff7f7f] text-white font-bold
+    shadow-md transition-all duration-200
+    hover:bg-[#ff6666] hover:-translate-y-0.5 hover:shadow-lg
+    disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:translate-y-0
+    cursor-pointer disabled:cursor-not-allowed;
+}
+
+/* Article box */
+.article-box {
+  @apply bg-white rounded-xl border border-gray-100 p-6 md:p-8 leading-8 text-gray-700;
+}
+
+/* Highlight text (strong in generated markdown) */
+.highlight-text {
+  background: linear-gradient(transparent 60%, #ffdfdf 60%);
+  padding: 0 3px;
+}
+
+/* Text color brand */
+.text-brand {
+  color: var(--color-brand);
+}
+
+/* Border color brand */
+.border-brand {
+  border-color: var(--color-brand);
 }

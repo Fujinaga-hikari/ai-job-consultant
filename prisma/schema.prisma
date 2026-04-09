@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model GenerationLog {
+  id            String          @id @default(cuid())
+  companyName   String
+  jobTitle      String
+  salary        String?
+  location      String?
+  content       String
+  persona       String?
+  result        String
+  createdAt     DateTime        @default(now())
+  consultations Consultation[]
+}
+
+model Consultation {
+  id              String         @id @default(cuid())
+  email           String
+  name            String?
+  companyName     String?
+  preferredTime   String?
+  generationLogId String?
+  generationLog   GenerationLog? @relation(fields: [generationLogId], references: [id])
+  createdAt       DateTime       @default(now())
+}
