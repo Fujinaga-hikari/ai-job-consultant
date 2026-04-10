@@ -9,9 +9,9 @@ type Props = {
 export default function JobResult({ markdown }: Props) {
   return (
     <div className="space-y-4">
-      <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg font-medium">
+      <p className="text-brand text-2xl md:text-3xl font-bold text-center">
         求人原稿が完成しました！
-      </div>
+      </p>
 
       <div className="article-box prose prose-lg max-w-none">
         <ReactMarkdown

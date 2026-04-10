@@ -23,7 +23,7 @@ export default function Home() {
 
   return (
     <main className="flex-1 w-full max-w-3xl mx-auto px-4 pb-16">
-      <Header />
+      <Header showBanner={result === null} />
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 mt-8">
         {result === null ? (
