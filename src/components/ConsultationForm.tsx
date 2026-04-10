@@ -155,7 +155,7 @@ export default function ConsultationForm({ logId, onBack }: Props) {
             className="w-4 h-4 accent-[#e63946]"
           />
           <span className="text-sm text-gray-700">
-            上記規定に同意して、無料相談（オンライン）を予約する
+            上記規定に同意して、無料相談する
           </span>
         </label>
 
