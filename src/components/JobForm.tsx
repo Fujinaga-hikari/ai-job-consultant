@@ -64,7 +64,7 @@ export default function JobForm({ onGenerated }: Props) {
           </label>
           <input
             name="companyName"
-            defaultValue="株式会社ミックスジョブ"
+            defaultValue="株式会社サンプル"
             className="input-field"
             required
           />
