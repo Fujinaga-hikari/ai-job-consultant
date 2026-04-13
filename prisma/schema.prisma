@@ -20,6 +20,18 @@ model GenerationLog {
   consultations Consultation[]
 }
 
+model RateLimit {
+  id        String   @id @default(cuid())
+  ip        String
+  date      String   // YYYY-MM-DD
+  count     Int      @default(1)
+  lastRequest DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@unique([ip, date])
+  @@index([ip, date])
+}
+
 model Consultation {
   id              String         @id @default(cuid())
   email           String
