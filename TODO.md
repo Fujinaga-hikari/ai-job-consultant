@@ -71,7 +71,7 @@ DB は **Vercel Postgres / Neon**（接続済み）。メールは **Resend**（
 ## 8. セキュリティ・品質
 
 - [x] 相談／リード API のバリデーション（Zod：メール形式、同意必須）
-- [ ] レート制限または乱用対策の検討（必要に応じて）
+- [x] レート制限または乱用対策の検討（IP 単位日次3回上限、バースト制御、Geo 制限を実装）
 - [ ] 生成文の注意書き（法令・求人票要件を満たす保証ではない等）
 
 ---
@@ -83,4 +83,4 @@ DB は **Vercel Postgres / Neon**（接続済み）。メールは **Resend**（
 
 ---
 
-*最終更新: 2026-04-10（方針: Vercel + Neon Postgres + Resend + Gemini）*
+*最終更新: 2026-04-21（方針: Vercel + Neon Postgres + Resend + Gemini）*
