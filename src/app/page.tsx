@@ -2,44 +2,52 @@
 
 import { useState } from "react";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import JobForm from "@/components/JobForm";
 import JobResult from "@/components/JobResult";
 import ConsultationForm from "@/components/ConsultationForm";
 
+export type JobMeta = {
+  companyName: string;
+  jobTitle: string;
+  salary: string;
+  location: string;
+};
+
 export default function Home() {
   const [result, setResult] = useState<string | null>(null);
   const [logId, setLogId] = useState("");
+  const [jobMeta, setJobMeta] = useState<JobMeta | null>(null);
 
-  function handleGenerated(markdown: string, id: string) {
+  function handleGenerated(markdown: string, id: string, meta: JobMeta) {
     setResult(markdown);
     setLogId(id);
+    setJobMeta(meta);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleBack() {
     setResult(null);
     setLogId("");
+    setJobMeta(null);
+  }
+
+  if (result !== null && jobMeta) {
+    return (
+      <div className="screen">
+        <Header />
+        <JobResult markdown={result} jobMeta={jobMeta} />
+        <ConsultationForm logId={logId} onBack={handleBack} />
+        <Footer />
+      </div>
+    );
   }
 
   return (
-    <main className="flex-1 w-full max-w-3xl mx-auto px-4 pb-16">
-      <Header showBanner={result === null} />
-
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 mt-8">
-        {result === null ? (
-          <JobForm onGenerated={handleGenerated} />
-        ) : (
-          <div className="space-y-10">
-            <JobResult markdown={result} />
-            <hr className="border-gray-200" />
-            <ConsultationForm logId={logId} onBack={handleBack} />
-          </div>
-        )}
-      </div>
-
-      <footer className="text-center text-xs text-gray-400 mt-8">
-        &copy; {new Date().getFullYear()} MixJob Inc. All rights reserved.
-      </footer>
-    </main>
+    <div className="screen">
+      <Header />
+      <JobForm onGenerated={handleGenerated} />
+      <Footer />
+    </div>
   );
 }
