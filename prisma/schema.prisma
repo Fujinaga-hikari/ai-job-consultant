@@ -32,6 +32,16 @@ model RateLimit {
   @@index([ip, date])
 }
 
+model PageView {
+  id        String   @id @default(cuid())
+  date      String   // YYYY-MM-DD JST
+  visitorId String   // SHA-256(IP + UA) — anonymous UU identifier
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([date, visitorId])
+}
+
 model Consultation {
   id              String         @id @default(cuid())
   email           String

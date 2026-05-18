@@ -64,7 +64,7 @@ export default function JobForm({ onGenerated }: Props) {
           </label>
           <input
             name="companyName"
-            defaultValue="株式会社サンプル"
+            placeholder="例：株式会社MixJob"
             className="input-field"
             required
           />
@@ -75,7 +75,7 @@ export default function JobForm({ onGenerated }: Props) {
           </label>
           <input
             name="jobTitle"
-            defaultValue="セールスマネージャー"
+            placeholder="例：営業マネージャー"
             className="input-field"
             required
           />
@@ -86,7 +86,7 @@ export default function JobForm({ onGenerated }: Props) {
           </label>
           <input
             name="salary"
-            defaultValue="年収600万円〜900万円"
+            placeholder="例：年収500万円〜800万円"
             className="input-field"
           />
         </div>
@@ -96,7 +96,7 @@ export default function JobForm({ onGenerated }: Props) {
           </label>
           <input
             name="location"
-            defaultValue="東京都渋谷区（ハイブリッド勤務）"
+            placeholder="例：東京都渋谷区（ハイブリッド可）"
             className="input-field"
           />
         </div>
