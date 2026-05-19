@@ -181,7 +181,7 @@ export default function JobForm({ onGenerated }: Props) {
             </div>
 
             <div className="body">
-              <form ref={formRef} onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
                 <div className="form-section-label">企業情報</div>
                 <div className="form-grid">
                   <div className="field">
