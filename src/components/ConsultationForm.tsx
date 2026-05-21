@@ -51,11 +51,6 @@ export default function ConsultationForm({ logId, onBack }: Props) {
           <div className="success-msg">
             リクエストを承りました！担当コンサルタントより最短即日でご連絡いたします。
           </div>
-          <button onClick={onBack} className="bottom-back" style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <span style={{ color: "var(--ink-500)", textDecoration: "underline", fontSize: 13 }}>
-              ← 新しい求人を作成する
-            </span>
-          </button>
         </div>
       </section>
     );

@@ -106,7 +106,7 @@ export default function JobForm({ onGenerated }: Props) {
             </div>
             <div className="item">
               <span className="num">¥0</span>
-              <span className="lbl">利用料金（永久無料）</span>
+              <span className="lbl">このサイトでのAI生成は無料！</span>
             </div>
           </div>
         </div>
@@ -282,7 +282,6 @@ export default function JobForm({ onGenerated }: Props) {
                   <div className="submit-meta">
                     <span className="meta-item">クレカ登録不要</span>
                     <span className="meta-item">入力は3分</span>
-                    <span className="meta-item">原稿は何度でも編集可</span>
                     <span className="meta-item">SSL暗号化</span>
                   </div>
                 </div>

@@ -32,6 +32,7 @@ async function sendEmail({
 
   if (!res.ok) {
     const body = await res.text();
+    console.error(`Brevo API error ${res.status}:`, body);
     throw new Error(`Brevo API error ${res.status}: ${body}`);
   }
 }
