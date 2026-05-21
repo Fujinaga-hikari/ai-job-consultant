@@ -157,8 +157,6 @@ export default function ConsultationForm({ logId, onBack }: Props) {
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
               <span>
                 <a href="https://mixjob.co.jp/privacy/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
-                {" "}および{" "}
-                <a href="https://mixjob.co.jp/privacy/" target="_blank" rel="noopener noreferrer">個人情報保護規定</a>
                 {" "}に同意の上、無料相談を申し込みます。
               </span>
             </label>
