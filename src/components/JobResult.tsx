@@ -47,31 +47,6 @@ export default function JobResult({ markdown, jobMeta }: Props) {
           内容を確認の上、プロのコンサルタントとの無料相談へお進みください。
         </p>
 
-        {/* Meta strip */}
-        <div className="meta-strip">
-          {jobMeta.companyName && (
-            <>
-              <div className="item">
-                <span className="k">企業</span>
-                <span className="v">{jobMeta.companyName}</span>
-              </div>
-              <div className="sep" />
-            </>
-          )}
-          {jobMeta.jobTitle && (
-            <>
-              <div className="item">
-                <span className="k">職種</span>
-                <span className="v">{jobMeta.jobTitle}</span>
-              </div>
-              <div className="sep" />
-            </>
-          )}
-          <div className="item">
-            <span className="k">生成モデル</span>
-            <span className="v">Gemini 2.5 Flash</span>
-          </div>
-        </div>
       </section>
 
       {/* Article */}

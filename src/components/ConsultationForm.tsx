@@ -117,18 +117,6 @@ export default function ConsultationForm({ logId, onBack }: Props) {
             <span className="free-badge">完全無料</span>
           </div>
 
-          <div className="consultant-row">
-            <div className="avatars">
-              <div className="avatar a1" />
-              <div className="avatar a2" />
-              <div className="avatar a3" />
-            </div>
-            <div className="text">
-              <strong>専任コンサルタントが担当します</strong>
-              <span className="availability">● 現在対応可能</span>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit}>
             <div className="form-grid" style={{ gap: 16, marginBottom: 16 }}>
               <div className="field col-span-2">

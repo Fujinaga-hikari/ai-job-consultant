@@ -13,7 +13,10 @@ export const consultationSchema = z.object({
   email: z.string().email("正しいメールアドレスを入力してください"),
   name: z.string().optional().default(""),
   companyName: z.string().optional().default(""),
-  phone: z.string().min(1, "電話番号は必須です"),
+  phone: z
+    .string()
+    .min(1, "電話番号は必須です")
+    .regex(/^\d{2,4}-\d{2,4}-\d{4}$/, "電話番号はハイフンあり（例：03-1234-5678）で入力してください"),
   preferredTime: z.string().optional().default(""),
   agreed: z.literal(true, {
     error: "プライバシーポリシーへの同意が必要です",
