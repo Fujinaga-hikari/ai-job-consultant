@@ -77,7 +77,13 @@ export async function sendAutoReplyEmail(email: string, name?: string) {
         <p>この度は無料相談にお申し込みいただき、誠にありがとうございます。</p>
         <p>担当コンサルタントより<strong>最短即日</strong>でご連絡させていただきます。</p>
         <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
-        <p style="font-size:0.85em;color:#888;">本メールは自動送信です。MixJob</p>
+        <p style="font-size:0.85em;color:#888;">
+          MIXJOB運営<br />
+          電話番号：03-6689-0593<br />
+          営業時間：平日9:00〜19:00<br />
+          運営元：株式会社HNCommunications<br /><br />
+          本メールは自動送信です。
+        </p>
       </div>
     `,
   });
