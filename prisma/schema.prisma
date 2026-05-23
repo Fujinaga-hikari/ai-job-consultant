@@ -47,6 +47,7 @@ model Consultation {
   email           String
   name            String?
   companyName     String?
+  phone           String?
   preferredTime   String?
   generationLogId String?
   generationLog   GenerationLog? @relation(fields: [generationLogId], references: [id])

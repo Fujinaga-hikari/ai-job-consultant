@@ -27,6 +27,7 @@ export default function ConsultationForm({ logId, onBack }: Props) {
           email: fd.get("email"),
           name: fd.get("name"),
           companyName: fd.get("companyName"),
+          phone: fd.get("phone"),
           preferredTime: fd.get("preferredTime"),
           agreed: true,
           generationLogId: logId,
@@ -141,6 +142,10 @@ export default function ConsultationForm({ logId, onBack }: Props) {
               <div className="field">
                 <label>会社名 <span className="opt">任意</span></label>
                 <input className="input" type="text" name="companyName" placeholder="株式会社○○" />
+              </div>
+              <div className="field col-span-2">
+                <label>電話番号 <span className="req">必須</span></label>
+                <input className="input" type="tel" name="phone" placeholder="例: 03-1234-5678" required />
               </div>
               <div className="field col-span-2">
                 <label>ご希望の連絡時間帯 <span className="opt">任意</span></label>

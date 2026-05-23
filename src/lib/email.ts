@@ -41,6 +41,7 @@ export async function sendNotificationEmail(data: {
   email: string;
   name?: string;
   companyName?: string;
+  phone?: string;
   preferredTime?: string;
 }) {
   const raw = process.env.NOTIFY_EMAIL || "";
@@ -59,6 +60,7 @@ export async function sendNotificationEmail(data: {
         <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">メール</td><td style="padding:8px;border:1px solid #ddd;">${data.email}</td></tr>
         <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">氏名</td><td style="padding:8px;border:1px solid #ddd;">${data.name || "未入力"}</td></tr>
         <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">会社名</td><td style="padding:8px;border:1px solid #ddd;">${data.companyName || "未入力"}</td></tr>
+        <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">電話番号</td><td style="padding:8px;border:1px solid #ddd;">${data.phone || "未入力"}</td></tr>
         <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">希望連絡時間</td><td style="padding:8px;border:1px solid #ddd;">${data.preferredTime || "未入力"}</td></tr>
       </table>
     `,

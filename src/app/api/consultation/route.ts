@@ -40,6 +40,7 @@ export async function POST(request: Request) {
         email: data.email,
         name: data.name || null,
         companyName: data.companyName || null,
+        phone: data.phone,
         preferredTime: data.preferredTime || null,
         generationLogId: data.generationLogId || null,
       },
