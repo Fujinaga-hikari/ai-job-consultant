@@ -688,6 +688,11 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.7; }
   font-size: 11px; color: var(--ink-500);
 }
 
+/* ─── Field error ─── */
+.field-error {
+  color: #dc2626; font-size: 12px; margin-top: 4px;
+}
+
 /* ─── Error box ─── */
 .error-box {
   background: #fef2f2; border: 1px solid #fecaca;

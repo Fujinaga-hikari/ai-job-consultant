@@ -12,12 +12,14 @@ export default function ConsultationForm({ logId, onBack }: Props) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!agreed) return;
     setLoading(true);
     setError("");
+    setFieldErrors({});
     const fd = new FormData(e.currentTarget);
     try {
       const res = await fetch("/api/consultation", {
@@ -35,6 +37,14 @@ export default function ConsultationForm({ logId, onBack }: Props) {
       });
       if (!res.ok) {
         const json = await res.json();
+        if (res.status === 400 && typeof json.error === "object" && json.error !== null) {
+          const errs: Record<string, string> = {};
+          for (const [key, msgs] of Object.entries(json.error)) {
+            if (Array.isArray(msgs) && msgs.length > 0) errs[key] = msgs[0] as string;
+          }
+          setFieldErrors(errs);
+          return;
+        }
         throw new Error(typeof json.error === "string" ? json.error : "送信に失敗しました");
       }
       setSubmitted(true);
@@ -123,6 +133,7 @@ export default function ConsultationForm({ logId, onBack }: Props) {
               <div className="field col-span-2">
                 <label>メールアドレス <span className="req">必須</span></label>
                 <input className="input" type="email" name="email" placeholder="your@company.co.jp" required />
+                {fieldErrors.email && <div className="field-error">{fieldErrors.email}</div>}
               </div>
               <div className="field">
                 <label>お名前 <span className="opt">任意</span></label>
@@ -135,6 +146,7 @@ export default function ConsultationForm({ logId, onBack }: Props) {
               <div className="field col-span-2">
                 <label>電話番号 <span className="req">必須</span></label>
                 <input className="input" type="tel" name="phone" placeholder="例: 03-1234-5678" required />
+                {fieldErrors.phone && <div className="field-error">{fieldErrors.phone}</div>}
               </div>
               <div className="field col-span-2">
                 <label>ご希望の連絡時間帯 <span className="opt">任意</span></label>
