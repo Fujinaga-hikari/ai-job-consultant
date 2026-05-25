@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP, Zen_Kaku_Gothic_New, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import TrackPageView from "@/components/TrackPageView";
+import Script from "next/script";
 import "./globals.css";
 
 const noto = Noto_Sans_JP({
@@ -60,6 +61,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <TrackPageView />
         <Analytics />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-E3T47NQM6M"
+          strategy="afterInteractive"
+        />
+        <Script id="ga-init" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-E3T47NQM6M');
+        `}</Script>
       </body>
     </html>
   );
