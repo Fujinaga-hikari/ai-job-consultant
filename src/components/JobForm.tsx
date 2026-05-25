@@ -43,6 +43,7 @@ export default function JobForm({ onGenerated }: Props) {
         throw new Error(json.error || "生成に失敗しました");
       }
       const json = await res.json();
+      window.gtag?.("event", "job_draft_generated", { event_category: "engagement" });
       onGenerated(json.result, json.logId, {
         companyName: data.companyName,
         jobTitle: data.jobTitle,

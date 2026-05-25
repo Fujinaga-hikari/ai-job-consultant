@@ -38,6 +38,7 @@ export default function ConsultationForm({ logId, onBack }: Props) {
         throw new Error(typeof json.error === "string" ? json.error : "送信に失敗しました");
       }
       setSubmitted(true);
+      window.gtag?.("event", "generate_lead", { event_category: "consultation" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "送信に失敗しました");
     } finally {
