@@ -27,8 +27,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // --- 海外アクセス制限（APIルートのみ） ---
-  if (ALLOWED_COUNTRIES.length > 0 && pathname.startsWith("/api/")) {
+  // --- 海外アクセス制限（APIルートのみ。Cron は Vercel 米国リージョンから呼ばれる） ---
+  if (
+    ALLOWED_COUNTRIES.length > 0 &&
+    pathname.startsWith("/api/") &&
+    !pathname.startsWith("/api/cron/")
+  ) {
     const country = request.headers.get("x-vercel-ip-country") || "";
     if (country && !ALLOWED_COUNTRIES.includes(country.toUpperCase())) {
       return NextResponse.json(
