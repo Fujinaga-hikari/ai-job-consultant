@@ -194,9 +194,11 @@ npm run dev
 |--------|------|------|
 | `aiconsul_DATABASE_URL` | PostgreSQL 接続文字列 | ✅ |
 | `GEMINI_API_KEY` | Google Gemini API キー | ✅ |
-| `RESEND_API_KEY` | Resend API キー | ✅ |
-| `EMAIL_FROM` | 送信元メールアドレス（Resend 検証済み） | — |
+| `BREVO_API_KEY` | Brevo API キー | ✅（メール送信時） |
+| `EMAIL_FROM` | 送信元メールアドレス（Brevo 検証済み） | — |
 | `NOTIFY_EMAIL` | 管理者通知先メールアドレス | — |
+| `WEEKLY_REPORT_EMAIL` | 週次レポート送信先（未設定時は `NOTIFY_EMAIL`） | — |
+| `CRON_SECRET` | Vercel Cron 認証用（`openssl rand -hex 32`） | ✅（週次レポート） |
 | `ADMIN_USER` | 管理画面ログインユーザー名 | ✅ |
 | `ADMIN_PASS` | 管理画面ログインパスワード | ✅ |
 | `ADMIN_TOKEN` | セッション Cookie 値（ランダム文字列） | ✅ |
@@ -206,6 +208,26 @@ npm run dev
 | `BASIC_AUTH_PASS` | 一時的な全体ロック用パスワード | — |
 
 すべてのシークレットはサーバーサイド専用です（`NEXT_PUBLIC_SITE_URL` を除く）。
+
+### 週次レポート（自動）
+
+毎週月曜 9:00（JST）に Vercel Cron が `/api/cron/weekly-report` を実行します。
+
+1. DB から PV / UU / 生成 / 問い合わせを集計
+2. Gemini でサマリー・アクションプラン（A〜D 分類）を生成
+3. `WEEKLY_REPORT_EMAIL`（または `NOTIFY_EMAIL`）へメール送信
+
+**Vercel に追加する環境変数:** `CRON_SECRET`（本番・プレビュー両方）
+
+手動実行:
+
+```bash
+npm run weekly-report
+# または
+curl -H "Authorization: Bearer $CRON_SECRET" https://lp.mixjob.co.jp/api/cron/weekly-report
+```
+
+メールに **「1はい / 2いいえ / 3保留」** で返信すると、Cursor で [A] 項目の実装に進めます。
 
 ---
 

@@ -10,7 +10,8 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "weekly-report": "node --env-file=.env scripts/run-weekly-report.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
