@@ -708,3 +708,95 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.7; }
   background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
   padding: 16px 24px; border-radius: 12px; font-size: 15px; font-weight: 500; margin-bottom: 20px;
 }
+
+/* ─── Static hero (SSR SEO section) ─── */
+.hero-static {
+  background: linear-gradient(180deg, #fdf8f1 0%, #fdfaf6 100%);
+  padding: 72px 48px 56px;
+  border-bottom: 1px solid var(--gray-100);
+}
+@media (max-width: 640px) { .hero-static { padding: 48px 20px 40px; } }
+
+.hero-static-inner { max-width: 760px; margin: 0 auto; }
+
+.hero-static-title {
+  font-family: var(--font-zen), var(--font-noto), sans-serif;
+  font-weight: 900;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+  color: var(--ink-900);
+}
+.hero-static-title .accent { color: var(--brand-red); }
+
+.hero-static-desc {
+  font-size: 16px;
+  color: var(--ink-700);
+  line-height: 1.9;
+  max-width: 600px;
+  margin: 0 0 32px;
+}
+
+.hero-static-features {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-wrap: wrap; gap: 16px;
+}
+.hero-static-features li {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: var(--ink-700);
+}
+.feature-icon {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--brand-red); color: white;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0;
+}
+
+/* ─── Static benefits (SSR SEO section) ─── */
+.benefits-static {
+  padding: 80px 48px 100px;
+  background: var(--cream-50);
+}
+@media (max-width: 640px) { .benefits-static { padding: 60px 20px 72px; } }
+
+.benefits-inner { max-width: 1080px; margin: 0 auto; }
+
+.benefits-title {
+  font-family: var(--font-zen), var(--font-noto), sans-serif;
+  font-weight: 900;
+  font-size: clamp(24px, 3.5vw, 36px);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 48px;
+  color: var(--ink-900);
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 768px) { .benefits-grid { grid-template-columns: 1fr; } }
+
+.benefit-card {
+  background: white;
+  border: 1px solid var(--gray-100);
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: var(--shadow-card);
+}
+.benefit-card h3 {
+  font-family: var(--font-zen), var(--font-noto), sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  margin: 0 0 12px;
+  color: var(--ink-900);
+  line-height: 1.4;
+}
+.benefit-card p {
+  font-size: 13px;
+  color: var(--ink-500);
+  line-height: 1.8;
+  margin: 0;
+}

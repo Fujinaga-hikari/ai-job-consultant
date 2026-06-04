@@ -23,7 +23,6 @@ export default function AdminLoginPage() {
       });
       if (res.ok) {
         router.push("/admin");
-        router.refresh();
       } else {
         setError("ユーザー名またはパスワードが違います");
       }

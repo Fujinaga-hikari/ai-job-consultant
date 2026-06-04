@@ -1,7 +1,7 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
-import type { JobMeta } from "@/app/page";
+import type { JobMeta } from "@/components/HomeClient";
 
 type Props = {
   markdown: string;
