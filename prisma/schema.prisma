@@ -42,6 +42,19 @@ model PageView {
   @@index([date, visitorId])
 }
 
+model Article {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  keyword         String
+  title           String
+  metaDescription String
+  content         String
+  publishedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  @@index([publishedAt])
+}
+
 model Consultation {
   id              String         @id @default(cuid())
   email           String
