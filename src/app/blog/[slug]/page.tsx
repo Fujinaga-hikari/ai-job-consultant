@@ -4,6 +4,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ArticleCtaLink from "@/components/ArticleCtaLink";
 import { prisma } from "@/lib/prisma";
 
 export const revalidate = 3600;
@@ -79,9 +80,7 @@ export default async function ArticlePage({
                 職種・業務内容を入力するだけで、応募者の心を掴む求人原稿を3分で生成。
                 採用のプロへの無料相談もついています。
               </p>
-              <Link href="/" className="article-cta-btn">
-                無料で求人票を生成する →
-              </Link>
+              <ArticleCtaLink slug={article.slug} />
             </div>
           </div>
         </div>

@@ -34,12 +34,25 @@ model RateLimit {
 
 model PageView {
   id        String   @id @default(cuid())
+  path      String   @default("/") // "/" = LP, "/blog/slug" = 記事
   date      String   // YYYY-MM-DD JST
   visitorId String   // SHA-256(IP + UA) — anonymous UU identifier
   createdAt DateTime @default(now())
 
   @@index([date])
   @@index([date, visitorId])
+  @@index([path])
+}
+
+model CtaClick {
+  id        String   @id @default(cuid())
+  slug      String   // 記事スラッグ
+  date      String   // YYYY-MM-DD JST
+  visitorId String
+  createdAt DateTime @default(now())
+
+  @@index([slug])
+  @@index([date])
 }
 
 model Article {

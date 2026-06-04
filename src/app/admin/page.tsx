@@ -4,7 +4,6 @@ import type { DailyDataPoint, WeeklyDataPoint } from "./components/DashboardChar
 import GenerateArticlesButton from "./components/GenerateArticlesButton";
 
 export const dynamic = "force-dynamic";
-
 export const revalidate = 0;
 
 function toJST(date: Date) {
@@ -17,6 +16,59 @@ function formatDate(d: Date) {
 
 function getWeekLabel(d: Date) {
   return `${d.getMonth() + 1}/${d.getDate()}週`;
+}
+
+async function getBlogStats() {
+  const now = toJST(new Date());
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [
+    totalBlogPV, weekBlogPV, monthBlogPV,
+    totalCtaClicks, weekCtaClicks, monthCtaClicks,
+    articles,
+    articlePVCounts,
+    articleCtaCounts,
+  ] = await Promise.all([
+    prisma.pageView.count({ where: { path: { startsWith: "/blog" } } }),
+    prisma.pageView.count({ where: { path: { startsWith: "/blog" }, createdAt: { gte: startOfWeek } } }),
+    prisma.pageView.count({ where: { path: { startsWith: "/blog" }, createdAt: { gte: startOfMonth } } }),
+    prisma.ctaClick.count(),
+    prisma.ctaClick.count({ where: { createdAt: { gte: startOfWeek } } }),
+    prisma.ctaClick.count({ where: { createdAt: { gte: startOfMonth } } }),
+    prisma.article.findMany({
+      select: { slug: true, title: true, publishedAt: true },
+      orderBy: { publishedAt: "desc" },
+    }),
+    prisma.pageView.groupBy({
+      by: ["path"],
+      where: { path: { startsWith: "/blog/" } },
+      _count: { id: true },
+    }),
+    prisma.ctaClick.groupBy({
+      by: ["slug"],
+      _count: { id: true },
+    }),
+  ]);
+
+  const totalBlogUU = await prisma.pageView
+    .groupBy({ by: ["visitorId"], where: { path: { startsWith: "/blog" } } })
+    .then((r) => r.length);
+
+  const pvBySlug = new Map(articlePVCounts.map((r) => [r.path.replace("/blog/", ""), r._count.id]));
+  const ctaBySlug = new Map(articleCtaCounts.map((r) => [r.slug, r._count.id]));
+
+  return {
+    totalBlogPV, weekBlogPV, monthBlogPV, totalBlogUU,
+    totalCtaClicks, weekCtaClicks, monthCtaClicks,
+    articles: articles.map((a) => ({
+      ...a,
+      pv: pvBySlug.get(a.slug) ?? 0,
+      cta: ctaBySlug.get(a.slug) ?? 0,
+    })),
+  };
 }
 
 async function getStats() {
@@ -220,8 +272,8 @@ function KpiCard({
 }
 
 export default async function AdminDashboard() {
-  const stats = await getStats();
-  const articleCount = await prisma.article.count();
+  const [stats, blogStats] = await Promise.all([getStats(), getBlogStats()]);
+  const articleCount = blogStats.articles.length;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
@@ -292,6 +344,56 @@ export default async function AdminDashboard() {
       <section className="space-y-4">
         <TrendChart data={stats.dailyData} />
         <WeeklyBarChart data={stats.weeklyData} />
+      </section>
+
+      {/* ブログ統計 */}
+      <section>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          ブログ（PV / UU / LP遷移）
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+          <KpiCard label="ブログ 累計PV" value={blogStats.totalBlogPV} color="indigo" />
+          <KpiCard label="今月PV" value={blogStats.monthBlogPV} color="indigo" />
+          <KpiCard label="今週PV" value={blogStats.weekBlogPV} color="indigo" />
+          <KpiCard label="ブログ 累計UU" value={blogStats.totalBlogUU} color="cyan" />
+          <KpiCard label="CTA遷移 累計" value={blogStats.totalCtaClicks} color="green" sub="ブログ→LP" />
+          <KpiCard label="CTA遷移 今月" value={blogStats.monthCtaClicks} color="green" />
+        </div>
+
+        {blogStats.articles.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-500">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium">記事タイトル</th>
+                  <th className="text-right px-4 py-3 font-medium">PV</th>
+                  <th className="text-right px-4 py-3 font-medium">LP遷移</th>
+                  <th className="text-right px-4 py-3 font-medium">遷移率</th>
+                  <th className="text-left px-4 py-3 font-medium">公開日</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {blogStats.articles.map((a) => (
+                  <tr key={a.slug} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-800 max-w-xs truncate">
+                      <a href={`/blog/${a.slug}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#e84730]">
+                        {a.title}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">{a.pv}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-green-600 font-semibold">{a.cta}</td>
+                    <td className="px-4 py-3 text-right tabular-nums text-gray-500">
+                      {a.pv > 0 ? `${((a.cta / a.pv) * 100).toFixed(1)}%` : "—"}
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 whitespace-nowrap text-xs">
+                      {new Date(a.publishedAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       {/* 直近の問い合わせ */}
