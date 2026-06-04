@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { TrendChart, WeeklyBarChart } from "./components/DashboardCharts";
 import type { DailyDataPoint, WeeklyDataPoint } from "./components/DashboardCharts";
+import GenerateArticlesButton from "./components/GenerateArticlesButton";
 
 export const dynamic = "force-dynamic";
 
@@ -220,10 +221,26 @@ function KpiCard({
 
 export default async function AdminDashboard() {
   const stats = await getStats();
+  const articleCount = await prisma.article.count();
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       <h1 className="text-2xl font-bold text-gray-800">ダッシュボード</h1>
+
+      {/* ブログ管理 */}
+      <section>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          ブログ記事管理
+        </h2>
+        <div className="bg-white rounded-xl shadow-sm p-5 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-sm text-gray-500">公開記事数</p>
+            <p className="text-3xl font-bold text-[#e84730]">{articleCount}<span className="text-lg ml-1">件</span></p>
+            <p className="text-xs text-gray-400 mt-1">毎週水曜に1記事自動生成</p>
+          </div>
+          <GenerateArticlesButton />
+        </div>
+      </section>
 
       {/* KPI：PV / UU */}
       <section>
