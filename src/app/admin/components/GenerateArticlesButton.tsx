@@ -4,20 +4,43 @@ import { useState } from "react";
 
 export default function GenerateArticlesButton() {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [result, setResult] = useState<{ generated: string[]; failed: string[] } | null>(null);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [errorMsg, setErrorMsg] = useState("");
 
   async function handleClick() {
     if (!confirm("未生成の記事を全て生成します。Gemini APIを使用します。よろしいですか？")) return;
     setStatus("loading");
-    try {
-      const res = await fetch("/api/admin/generate-articles", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setResult({ generated: data.generated ?? [], failed: data.failed ?? [] });
-      setStatus("done");
-    } catch {
-      setStatus("error");
+    setProgress({ done: 0, total: 0 });
+
+    let done = 0;
+    // 最大10回ループ（キーワード数以上は回らない）
+    for (let i = 0; i < 10; i++) {
+      try {
+        const res = await fetch("/api/admin/generate-articles", { method: "POST" });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setErrorMsg(data.error ?? "不明なエラー");
+          setStatus("error");
+          return;
+        }
+
+        // 全記事生成済みだった場合
+        if (data.message === "全記事生成済み") break;
+
+        done++;
+        const remaining = data.remaining ?? 0;
+        setProgress({ done, total: done + remaining });
+
+        if (remaining === 0) break;
+      } catch {
+        setErrorMsg("通信エラーが発生しました");
+        setStatus("error");
+        return;
+      }
     }
+
+    setStatus("done");
   }
 
   return (
@@ -29,21 +52,21 @@ export default function GenerateArticlesButton() {
       >
         {status === "loading" ? (
           <>
-            <span className="animate-spin">⟳</span> 生成中…（1〜2分かかります）
+            <span className="animate-spin inline-block">⟳</span>
+            {progress.total > 0
+              ? `生成中… ${progress.done} / ${progress.total}件`
+              : "生成中…"}
           </>
         ) : (
           "ブログ記事を一括生成"
         )}
       </button>
 
-      {status === "done" && result && (
-        <p className="text-sm text-green-600">
-          ✓ {result.generated.length}件生成完了
-          {result.failed.length > 0 && `、${result.failed.length}件失敗`}
-        </p>
+      {status === "done" && (
+        <p className="text-sm text-green-600">✓ {progress.done}件生成完了</p>
       )}
       {status === "error" && (
-        <p className="text-sm text-red-500">エラーが発生しました。もう一度お試しください。</p>
+        <p className="text-sm text-red-500">エラー: {errorMsg}</p>
       )}
     </div>
   );
