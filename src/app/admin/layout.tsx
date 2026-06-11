@@ -21,6 +21,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin/generations" className="text-sm text-gray-600 hover:text-[#e84730] transition-colors">
           生成ログ
         </Link>
+        <Link href="/admin/articles" className="text-sm text-gray-600 hover:text-[#e84730] transition-colors">
+          ブログ記事
+        </Link>
         <div className="ml-auto">
           <AdminLogoutButton />
         </div>
