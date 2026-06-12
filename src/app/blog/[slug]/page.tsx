@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCtaLink from "@/components/ArticleCtaLink";
+import ArticleBody from "@/components/ArticleBody";
 import { prisma } from "@/lib/prisma";
 
 export const revalidate = 3600;
@@ -64,9 +64,7 @@ export default async function ArticlePage({
               </p>
             </header>
 
-            <div className="article-content">
-              <ReactMarkdown>{article.content}</ReactMarkdown>
-            </div>
+            <ArticleBody content={article.content} />
           </article>
 
           {/* CTA */}
