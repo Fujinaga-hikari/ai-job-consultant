@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { ARTICLE_KEYWORDS } from "@/lib/article-keywords";
+import ArticleGenerator from "@/components/admin/ArticleGenerator";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ブログ記事管理 | MixJob管理画面" };
@@ -8,6 +10,9 @@ export default async function AdminArticlesPage() {
   const articles = await prisma.article.findMany({
     orderBy: { publishedAt: "desc" },
   });
+
+  const existingSlugs = new Set(articles.map((a) => a.slug));
+  const remaining = ARTICLE_KEYWORDS.filter((k) => !existingSlugs.has(k.slug)).length;
 
   const slugStats = articles.length > 0
     ? await Promise.all([
@@ -41,7 +46,10 @@ export default async function AdminArticlesPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800">ブログ記事</h1>
-        <span className="text-sm text-gray-400">{articles.length}件</span>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-400">{articles.length}件</span>
+          <ArticleGenerator remaining={remaining} />
+        </div>
       </div>
 
       {articles.length === 0 ? (
