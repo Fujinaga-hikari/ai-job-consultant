@@ -11,8 +11,9 @@ export default function ArticleBody({ content }: { content: string }) {
       <ReactMarkdown
         components={{
           img({ src, alt }) {
-            if (src && IMAGE_TAG_PATTERN.test(src)) {
-              const tag = src.replace("IMAGE:", "").trim().toLowerCase();
+            const srcStr = typeof src === "string" ? src : undefined;
+            if (srcStr && IMAGE_TAG_PATTERN.test(srcStr)) {
+              const tag = srcStr.replace("IMAGE:", "").trim().toLowerCase();
               const url = resolveArticleImage(tag, imgIndex++);
               return (
                 <span className="article-image-wrap">
@@ -20,7 +21,7 @@ export default function ArticleBody({ content }: { content: string }) {
                 </span>
               );
             }
-            return <img src={src} alt={alt ?? ""} className="article-image" loading="lazy" />;
+            return <img src={srcStr} alt={alt ?? ""} className="article-image" loading="lazy" />;
           },
           a({ href, children }) {
             if (href?.startsWith("cta:")) {
