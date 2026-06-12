@@ -4,7 +4,7 @@ const ALLOWED_COUNTRIES = process.env.ALLOWED_COUNTRIES
   ? process.env.ALLOWED_COUNTRIES.split(",").map((c) => c.trim().toUpperCase())
   : [];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // --- 管理画面ルート ---
