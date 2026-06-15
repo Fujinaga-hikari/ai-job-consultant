@@ -26,7 +26,12 @@ export default function GenerateArticlesButton() {
         }
 
         // 全記事生成済みだった場合
-        if (data.message === "全記事生成済み") break;
+        if (data.message === "全記事生成済み") {
+          setErrorMsg("");
+          setStatus("done");
+          setProgress({ done: 0, total: 0 });
+          return;
+        }
 
         done++;
         const remaining = data.remaining ?? 0;
@@ -62,8 +67,16 @@ export default function GenerateArticlesButton() {
         )}
       </button>
 
-      {status === "done" && (
+      {status === "done" && progress.done > 0 && (
         <p className="text-sm text-green-600">✓ {progress.done}件生成完了</p>
+      )}
+      {status === "done" && progress.done === 0 && (
+        <p className="text-sm text-gray-500">
+          全キーワード生成済みです。
+          <a href="/admin/articles" className="text-[#e84730] hover:underline ml-1">
+            キーワード一覧を見る
+          </a>
+        </p>
       )}
       {status === "error" && (
         <p className="text-sm text-red-500">エラー: {errorMsg}</p>

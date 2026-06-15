@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { TrendChart, WeeklyBarChart } from "./components/DashboardCharts";
-import type { DailyDataPoint, WeeklyDataPoint } from "./components/DashboardCharts";
-import GenerateArticlesButton from "./components/GenerateArticlesButton";
+import { TrendChart, WeeklyBarChart } from "../components/DashboardCharts";
+import type { DailyDataPoint, WeeklyDataPoint } from "../components/DashboardCharts";
+import GenerateArticlesButton from "../components/GenerateArticlesButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -290,7 +290,12 @@ export default async function AdminDashboard() {
             <p className="text-3xl font-bold text-[#e84730]">{articleCount}<span className="text-lg ml-1">件</span></p>
             <p className="text-xs text-gray-400 mt-1">毎週水曜に1記事自動生成</p>
           </div>
-          <GenerateArticlesButton />
+          <div className="flex flex-col items-end gap-2">
+            <GenerateArticlesButton />
+            <a href="/admin/articles" className="text-sm text-[#e84730] hover:underline">
+              キーワードを選んで生成 →
+            </a>
+          </div>
         </div>
       </section>
 

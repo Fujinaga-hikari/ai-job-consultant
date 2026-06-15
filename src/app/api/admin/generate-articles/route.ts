@@ -17,28 +17,49 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const body = await request.json().catch(() => ({}));
+  const requestedSlug =
+    typeof body.slug === "string" && body.slug.length > 0 ? body.slug : undefined;
+
   const existingSlugs = await prisma.article.findMany({ select: { slug: true } });
   const existingSet = new Set(existingSlugs.map((a) => a.slug));
   const pending = ARTICLE_KEYWORDS.filter((k) => !existingSet.has(k.slug));
 
   if (pending.length === 0) {
-    return NextResponse.json({ ok: true, message: "全記事生成済み", generated: [] });
+    return NextResponse.json({ ok: true, message: "全記事生成済み", generated: null });
   }
 
-  // 1リクエストで1記事のみ生成（タイムアウト対策）
-  const entry = pending[0];
+  const entry = requestedSlug
+    ? ARTICLE_KEYWORDS.find((k) => k.slug === requestedSlug)
+    : pending[0];
+
+  if (!entry) {
+    return NextResponse.json({ error: "キーワードが見つかりません" }, { status: 400 });
+  }
+
+  if (existingSet.has(entry.slug)) {
+    return NextResponse.json({ error: "このキーワードは既に生成済みです" }, { status: 409 });
+  }
+
   try {
     const { title, metaDescription, content } = await generateSeoArticle(
       entry.keyword,
-      entry.titleHint
+      entry.titleHint,
     );
     await prisma.article.create({
-      data: { slug: entry.slug, keyword: entry.keyword, title, metaDescription, content },
+      data: {
+        slug: entry.slug,
+        keyword: entry.keyword,
+        title,
+        metaDescription,
+        content,
+      },
     });
     return NextResponse.json({
       ok: true,
       generated: entry.slug,
-      remaining: pending.length - 1,
+      keyword: entry.keyword,
+      remaining: pending.filter((k) => k.slug !== entry.slug).length,
     });
   } catch (err) {
     console.error(`記事生成失敗: ${entry.slug}`, err);
