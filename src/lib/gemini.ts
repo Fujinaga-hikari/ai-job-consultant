@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { parseGeminiJson } from "@/lib/parse-gemini-json";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -67,24 +68,26 @@ ${titleHint}
   - 前後の文脈と齟齬が出ないよう、読者が「試してみたい」と思うタイミングに置くこと
 
 【出力形式】
-必ず以下のJSONのみを出力してください（マークダウンコードブロック不要）:
+必ず以下のJSONのみを出力してください（マークダウンコードブロック不要）。
+content 内の改行は必ず \\n でエスケープし、JSONとして有効な1行の文字列にしてください:
 {
   "title": "記事タイトル（40文字以内、キーワードを含む）",
   "metaDescription": "メタディスクリプション（120文字以内、キーワードを含む）",
-  "content": "Markdown形式の記事本文"
+  "content": "Markdown形式の記事本文（改行は\\\\n）"
 }`;
 
   const result = await model.generateContent(prompt);
   const text = result.response.text().trim();
-
-  // JSONブロックを除去してパース
-  const jsonText = text.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-  const parsed = JSON.parse(jsonText);
+  const parsed = parseGeminiJson<{
+    title: string;
+    metaDescription: string;
+    content: string;
+  }>(text);
 
   return {
-    title: parsed.title as string,
-    metaDescription: parsed.metaDescription as string,
-    content: parsed.content as string,
+    title: parsed.title,
+    metaDescription: parsed.metaDescription,
+    content: parsed.content.replace(/\\n/g, "\n"),
   };
 }
 
@@ -131,7 +134,6 @@ ${data.takenSlugs.slice(0, 50).join("\n")}
 
   const result = await model.generateContent(prompt);
   const text = result.response.text().trim();
-  const jsonText = text.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-  const parsed = JSON.parse(jsonText) as { keywords: SuggestedKeyword[] };
+  const parsed = parseGeminiJson<{ keywords: SuggestedKeyword[] }>(text);
   return Array.isArray(parsed.keywords) ? parsed.keywords : [];
 }
