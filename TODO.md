@@ -1,7 +1,7 @@
 # Vercel 前提リリース ToDo
 
 採用担当者向け LP（AI 求人ドラフト生成 → 掲載サービス誘導）を **Vercel 上で運用する**ためのタスク一覧。  
-DB は **Vercel Postgres / Neon**（接続済み）。メールは **Resend**（契約済み想定）。AI は **Gemini**（サーバー側のみ）。
+DB は **Vercel Postgres / Neon**（接続済み）。メールは **Brevo（Resend 代替）**。AI は **Gemini**（サーバー側のみ）。
 
 ---
 
@@ -20,6 +20,7 @@ DB は **Vercel Postgres / Neon**（接続済み）。メールは **Resend**（
 - [x] **本番・プレビュー**の環境変数を設定（`GEMINI_API_KEY`、`aiconsul_DATABASE_URL`、`BASIC_AUTH_*`）
 - [ ] Node バージョンがプロジェクトと一致していることの確認
 - [x] ベーシック認証を追加（環境変数で ON/OFF 可能）
+- [x] Vercel に `lp.mixjob.co.jp` を登録済み
 
 ---
 
@@ -34,18 +35,29 @@ DB は **Vercel Postgres / Neon**（接続済み）。メールは **Resend**（
 
 ## 4. ドメイン（企業サブドメイン）
 
-- [ ] 掲載サービス側と **サブドメイン名** を合意（例：`tool.example.jp`）
-- [ ] Vercel の「Domains」にサブドメインを追加し、表示される **DNS レコード** を IT に依頼
-- [ ] 検証：HTTPS で LP が開くこと
+- [x] お名前.comで対象ドメイン（`mixjob.co.jp`）を管理する方針に決定
+- [x] LP は `lp.mixjob.co.jp` で公開する方針に決定（`www` は使わない）
+- [ ] **【次のアクション】お名前.com の「サーバーのDNS設定」（`ns-rs1.gmoserver.jp` 側）に以下を追加：**
+  - CNAME `lp` → `f809c1fadb5aae8f.vercel-dns-017.com`
+  - TXT `@` → `brevo-code:a3249bebb08878f0a93f1435ab7dea8e`
+  - CNAME `brevo1._domainkey` → `b1.mixjob-co-jp.dkim.brevo.com`
+  - CNAME `brevo2._domainkey` → `b2.mixjob-co-jp.dkim.brevo.com`
+  - TXT `_dmarc` → `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com`
+  - ※ 「ドメインのDNS設定」（`dnsv.jp` 側）には追加済みだが**そちらは使われていない**
+- [ ] Vercel の「Domains」で `lp.mixjob.co.jp` が `Valid` になっていることを確認
+- [ ] 検証：HTTPS で `lp.mixjob.co.jp` が開くこと
 
 ---
 
-## 5. メール（Resend）
+## 5. メール（Brevo）
 
-- [ ] Resend で **送信ドメイン**（上記サブドメイン or 親ドメイン）を追加
-- [ ] Resend が提示する **SPF / DKIM 等の DNS** を企業 DNS に登録（IT 依頼）
+- [x] Brevo で送信ドメイン（`mixjob.co.jp`）を追加
+- [x] Brevo が提示する DNS をお名前.comに登録（`brevo-code` TXT、`brevo1/2._domainkey` CNAME）
+- [ ] Brevo で `Verify / Authenticate` を再実行し、`Authenticated` を確認（上記 DNS 追加後）
+- [ ] DNS 反映確認（`nslookup` で TXT/CNAME の外部応答確認）
 - [x] アプリ側：`RESEND_API_KEY` があるときだけ送信（未設定時は DB のみでリリース可）
 - [x] トランザクションメール：受付確認テンプレ実装済み（社内通知 + ユーザー自動返信）
+- [ ] アプリ設定を Brevo へ切り替え（SMTP または API、環境変数更新）
 - [ ] マーケメールは受付確認と分離（必要なら別オプトイン）
 
 ---
@@ -83,4 +95,4 @@ DB は **Vercel Postgres / Neon**（接続済み）。メールは **Resend**（
 
 ---
 
-*最終更新: 2026-04-21（方針: Vercel + Neon Postgres + Resend + Gemini）*
+*最終更新: 2026-05-07（方針: Vercel + Neon Postgres + Brevo + Gemini）*
