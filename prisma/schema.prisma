@@ -68,6 +68,33 @@ model Article {
   @@index([publishedAt])
 }
 
+model ArticleKeyword {
+  id        String               @id @default(cuid())
+  slug      String               @unique
+  keyword   String
+  titleHint String
+  source    ArticleKeywordSource @default(AI)
+  status    ArticleKeywordStatus @default(PENDING)
+  error     String?
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ArticleKeywordSource {
+  SEED
+  AI
+  MANUAL
+}
+
+enum ArticleKeywordStatus {
+  PENDING
+  GENERATED
+  FAILED
+}
+
 model Consultation {
   id              String         @id @default(cuid())
   email           String

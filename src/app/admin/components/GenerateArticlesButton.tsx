@@ -1,55 +1,63 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+const MASS_QUEUE_TARGET = 15;
+const MASS_GENERATE_LIMIT = 15;
 
 export default function GenerateArticlesButton() {
+  const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [progress, setProgress] = useState({ done: 0, total: 0 });
-  const [errorMsg, setErrorMsg] = useState("");
+  const [message, setMessage] = useState("");
 
   async function handleClick() {
-    if (!confirm("未生成の記事を全て生成します。Gemini APIを使用します。よろしいですか？")) return;
-    setStatus("loading");
-    setProgress({ done: 0, total: 0 });
-
-    let done = 0;
-    // 最大10回ループ（キーワード数以上は回らない）
-    for (let i = 0; i < 10; i++) {
-      try {
-        const res = await fetch("/api/admin/generate-articles", { method: "POST" });
-        const data = await res.json();
-
-        if (!res.ok) {
-          setErrorMsg(data.error ?? "不明なエラー");
-          setStatus("error");
-          return;
-        }
-
-        // 全記事生成済みだった場合
-        if (data.message === "全記事生成済み") {
-          setErrorMsg("");
-          setStatus("done");
-          setProgress({ done: 0, total: 0 });
-          return;
-        }
-
-        done++;
-        const remaining = data.remaining ?? 0;
-        setProgress({ done, total: done + remaining });
-
-        if (remaining === 0) break;
-      } catch {
-        setErrorMsg("通信エラーが発生しました");
-        setStatus("error");
-        return;
-      }
+    if (
+      !confirm(
+        `AIがキーワードを補充し、記事を最大${MASS_GENERATE_LIMIT}件まで自動生成します（時間・API料金がかかります）。よろしいですか？`,
+      )
+    ) {
+      return;
     }
+    setStatus("loading");
+    setMessage("キーワード補充中…");
 
-    setStatus("done");
+    try {
+      const suggestRes = await fetch("/api/admin/suggest-keywords", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ targetQueueSize: MASS_QUEUE_TARGET }),
+      });
+      const suggestJson = await suggestRes.json();
+      if (!suggestRes.ok || !suggestJson.ok) {
+        throw new Error(suggestJson.error ?? "キーワード提案に失敗しました");
+      }
+
+      let generated = 0;
+      for (let i = 0; i < MASS_GENERATE_LIMIT; i++) {
+        setMessage(`記事生成中… ${generated + 1} / ${MASS_GENERATE_LIMIT}`);
+        const res = await fetch("/api/admin/generate-articles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error ?? "生成に失敗しました");
+        if (!data.generated) break;
+        generated++;
+      }
+
+      setMessage(`キーワード ${suggestJson.count ?? 0} 件追加 · 記事 ${generated} 件生成`);
+      setStatus("done");
+      router.refresh();
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "通信エラーが発生しました");
+      setStatus("error");
+    }
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 items-end">
       <button
         onClick={handleClick}
         disabled={status === "loading"}
@@ -58,29 +66,18 @@ export default function GenerateArticlesButton() {
         {status === "loading" ? (
           <>
             <span className="animate-spin inline-block">⟳</span>
-            {progress.total > 0
-              ? `生成中… ${progress.done} / ${progress.total}件`
-              : "生成中…"}
+            {message}
           </>
         ) : (
-          "ブログ記事を一括生成"
+          "🚀 大量生産（最大15件）"
         )}
       </button>
 
-      {status === "done" && progress.done > 0 && (
-        <p className="text-sm text-green-600">✓ {progress.done}件生成完了</p>
-      )}
-      {status === "done" && progress.done === 0 && (
-        <p className="text-sm text-gray-500">
-          全キーワード生成済みです。
-          <a href="/admin/articles" className="text-[#e84730] hover:underline ml-1">
-            キーワード一覧を見る
-          </a>
-        </p>
-      )}
-      {status === "error" && (
-        <p className="text-sm text-red-500">エラー: {errorMsg}</p>
-      )}
+      {status === "done" && <p className="text-sm text-green-600">✓ {message}</p>}
+      {status === "error" && <p className="text-sm text-red-500">エラー: {message}</p>}
+      <a href="/admin/articles" className="text-sm text-[#e84730] hover:underline">
+        キーワード一覧・詳細設定 →
+      </a>
     </div>
   );
 }

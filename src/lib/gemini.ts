@@ -87,3 +87,51 @@ ${titleHint}
     content: parsed.content as string,
   };
 }
+
+export type SuggestedKeyword = {
+  keyword: string;
+  titleHint: string;
+  slug: string;
+};
+
+export async function suggestArticleKeywords(data: {
+  count: number;
+  existingKeywords: string[];
+  takenSlugs: string[];
+}): Promise<SuggestedKeyword[]> {
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const prompt = `あなたは採用・求人領域のSEOストラテジストです。
+MixJob（AI求人ドラフト生成LP）のブログ向けに、検索されやすくCVに繋がるキーワードを提案してください。
+
+【サービス概要】
+- 採用担当者がAIで求人票・求人原稿を素早く作れる無料ツール
+- ターゲット: 中小〜中堅企業の採用担当・人事
+
+【既にカバー済みのキーワード（重複禁止）】
+${data.existingKeywords.length > 0 ? data.existingKeywords.join("\n") : "（なし）"}
+
+【使用済みスラッグ（重複禁止）】
+${data.takenSlugs.slice(0, 50).join("\n")}
+
+【要件】
+- ${data.count}件提案
+- 各キーワードは2〜5語の日本語（検索意図が明確）
+- 職種別・課題別・HowTo系をバランスよく
+- 求人票/求人原稿/採用/リクルーティング周辺に限定
+- slug は英小文字とハイフンのみ（例: nurse-kyujinhyo-kakikata）
+- titleHint は40文字以内の記事タイトル案
+
+【出力】JSONのみ（コードブロック不要）:
+{
+  "keywords": [
+    { "keyword": "...", "titleHint": "...", "slug": "..." }
+  ]
+}`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text().trim();
+  const jsonText = text.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+  const parsed = JSON.parse(jsonText) as { keywords: SuggestedKeyword[] };
+  return Array.isArray(parsed.keywords) ? parsed.keywords : [];
+}

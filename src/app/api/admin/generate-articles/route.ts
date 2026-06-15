@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { generateSeoArticle } from "@/lib/gemini";
-import { ARTICLE_KEYWORDS } from "@/lib/article-keywords";
+import {
+  generateArticleBySlug,
+  generateNextPendingArticle,
+  listKeywordRows,
+} from "@/lib/article-pipeline";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -21,48 +23,44 @@ export async function POST(request: NextRequest) {
   const requestedSlug =
     typeof body.slug === "string" && body.slug.length > 0 ? body.slug : undefined;
 
-  const existingSlugs = await prisma.article.findMany({ select: { slug: true } });
-  const existingSet = new Set(existingSlugs.map((a) => a.slug));
-  const pending = ARTICLE_KEYWORDS.filter((k) => !existingSet.has(k.slug));
-
-  if (pending.length === 0) {
-    return NextResponse.json({ ok: true, message: "全記事生成済み", generated: null });
-  }
-
-  const entry = requestedSlug
-    ? ARTICLE_KEYWORDS.find((k) => k.slug === requestedSlug)
-    : pending[0];
-
-  if (!entry) {
-    return NextResponse.json({ error: "キーワードが見つかりません" }, { status: 400 });
-  }
-
-  if (existingSet.has(entry.slug)) {
-    return NextResponse.json({ error: "このキーワードは既に生成済みです" }, { status: 409 });
-  }
-
   try {
-    const { title, metaDescription, content } = await generateSeoArticle(
-      entry.keyword,
-      entry.titleHint,
-    );
-    await prisma.article.create({
-      data: {
-        slug: entry.slug,
-        keyword: entry.keyword,
-        title,
-        metaDescription,
-        content,
-      },
-    });
+    if (requestedSlug) {
+      const result = await generateArticleBySlug(requestedSlug);
+      const remaining = (await listKeywordRows()).filter(
+        (k) => k.status === "pending" || k.status === "failed",
+      ).length;
+      return NextResponse.json({
+        ok: true,
+        generated: result.slug,
+        keyword: result.keyword,
+        remaining,
+      });
+    }
+
+    const result = await generateNextPendingArticle();
+    if (!result) {
+      return NextResponse.json({
+        ok: true,
+        message: "未生成キーワードがありません",
+        generated: null,
+      });
+    }
+
+    const remaining = (await listKeywordRows()).filter(
+      (k) => k.status === "pending" || k.status === "failed",
+    ).length;
+
     return NextResponse.json({
       ok: true,
-      generated: entry.slug,
-      keyword: entry.keyword,
-      remaining: pending.filter((k) => k.slug !== entry.slug).length,
+      generated: result.slug,
+      keyword: result.keyword,
+      remaining,
     });
   } catch (err) {
-    console.error(`記事生成失敗: ${entry.slug}`, err);
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
+    console.error("generate-articles failed:", err);
+    return NextResponse.json(
+      { ok: false, error: err instanceof Error ? err.message : String(err) },
+      { status: 500 },
+    );
   }
 }

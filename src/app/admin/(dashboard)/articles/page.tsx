@@ -1,29 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { ARTICLE_KEYWORDS } from "@/lib/article-keywords";
+import { listKeywordRows } from "@/lib/article-pipeline";
 import KeywordArticlePanel from "@/components/admin/KeywordArticlePanel";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ブログ記事管理 | MixJob管理画面" };
 
 export default async function AdminArticlesPage() {
-  const articles = await prisma.article.findMany({
-    orderBy: { publishedAt: "desc" },
-  });
-
-  const articleBySlug = new Map(articles.map((a) => [a.slug, a]));
-
-  const keywordRows = ARTICLE_KEYWORDS.map((entry) => {
-    const article = articleBySlug.get(entry.slug);
-    return {
-      slug: entry.slug,
-      keyword: entry.keyword,
-      titleHint: entry.titleHint,
-      status: article ? ("published" as const) : ("pending" as const),
-      title: article?.title,
-    };
-  });
+  const [keywordRows, articles] = await Promise.all([
+    listKeywordRows(),
+    prisma.article.findMany({ orderBy: { publishedAt: "desc" } }),
+  ]);
 
   const slugStats =
     articles.length > 0
@@ -54,7 +42,9 @@ export default async function AdminArticlesPage() {
     ]),
   );
 
-  const pendingCount = keywordRows.filter((k) => k.status === "pending").length;
+  const pendingCount = keywordRows.filter(
+    (k) => k.status === "pending" || k.status === "failed",
+  ).length;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">

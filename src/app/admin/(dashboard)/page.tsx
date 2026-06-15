@@ -288,7 +288,7 @@ export default async function AdminDashboard() {
           <div>
             <p className="text-sm text-gray-500">公開記事数</p>
             <p className="text-3xl font-bold text-[#e84730]">{articleCount}<span className="text-lg ml-1">件</span></p>
-            <p className="text-xs text-gray-400 mt-1">毎週水曜に1記事自動生成</p>
+            <p className="text-xs text-gray-400 mt-1">記事生成は管理画面のボタン操作のみ</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <GenerateArticlesButton />
