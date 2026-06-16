@@ -2,36 +2,22 @@
  * 記事内画像の管理
  *
  * Gemini が生成した ![説明](IMAGE:タグ) を実際の画像URLに変換する。
- * ローカル画像（public/images/articles/）を優先し、なければ Unsplash にフォールバック。
+ * LOCAL_POOL に画像があればタグに関係なくそこからローテーション。
+ * 空の場合は Unsplash にフォールバック（タグで分類）。
  *
- * 画像の追加方法:
- *   1. public/images/articles/<タグ>/ にファイルを置く
- *      例: public/images/articles/office/photo1.jpg
- *   2. 下の LOCAL_IMAGES にパスを追記する
- *
- * 使えるタグ: office / meeting / hiring / team / document / work
+ * 画像を追加するには:
+ *   public/images/articles/ にファイルを置いて LOCAL_POOL にパスを追記するだけ。
  */
 
-const LOCAL_IMAGES: Record<string, string[]> = {
-  office: [
-    // 例: "/images/articles/office/photo1.jpg",
-  ],
-  meeting: [
-    // 例: "/images/articles/meeting/photo1.jpg",
-  ],
-  hiring: [
-    // 例: "/images/articles/hiring/photo1.jpg",
-  ],
-  team: [
-    // 例: "/images/articles/team/photo1.jpg",
-  ],
-  document: [
-    // 例: "/images/articles/document/photo1.jpg",
-  ],
-  work: [
-    // 例: "/images/articles/work/photo1.jpg",
-  ],
-};
+const LOCAL_POOL: string[] = [
+  "/images/articles/pixta_117916914_S.jpg",
+  "/images/articles/pixta_120396928_S.jpg",
+  "/images/articles/pixta_125544925_S.jpg",
+  "/images/articles/pixta_130400523_S.jpg",
+  "/images/articles/%E3%81%AA%E3%82%84%E3%81%BE%E3%81%97%E3%81%84.jpg",
+  "/images/articles/%E3%81%B2%E3%82%89%E3%82%81%E3%81%8D.jpg",
+  "/images/articles/%E6%82%A9%E3%81%BE%E3%81%97%E3%81%84.jpg",
+];
 
 const UNSPLASH_FALLBACK: Record<string, string[]> = {
   office: [
@@ -67,10 +53,11 @@ const UNSPLASH_FALLBACK: Record<string, string[]> = {
 };
 
 export function resolveArticleImage(tag: string, index: number): string {
-  const local = LOCAL_IMAGES[tag] ?? [];
+  if (LOCAL_POOL.length > 0) {
+    return LOCAL_POOL[index % LOCAL_POOL.length];
+  }
   const fallback = UNSPLASH_FALLBACK[tag] ?? UNSPLASH_FALLBACK.office;
-  const pool = local.length > 0 ? local : fallback;
-  return pool[index % pool.length];
+  return fallback[index % fallback.length];
 }
 
 export const IMAGE_TAG_PATTERN = /^IMAGE:/;
