@@ -1,4 +1,39 @@
-const IMAGES: Record<string, string[]> = {
+/**
+ * 記事内画像の管理
+ *
+ * Gemini が生成した ![説明](IMAGE:タグ) を実際の画像URLに変換する。
+ * ローカル画像（public/images/articles/）を優先し、なければ Unsplash にフォールバック。
+ *
+ * 画像の追加方法:
+ *   1. public/images/articles/<タグ>/ にファイルを置く
+ *      例: public/images/articles/office/photo1.jpg
+ *   2. 下の LOCAL_IMAGES にパスを追記する
+ *
+ * 使えるタグ: office / meeting / hiring / team / document / work
+ */
+
+const LOCAL_IMAGES: Record<string, string[]> = {
+  office: [
+    // 例: "/images/articles/office/photo1.jpg",
+  ],
+  meeting: [
+    // 例: "/images/articles/meeting/photo1.jpg",
+  ],
+  hiring: [
+    // 例: "/images/articles/hiring/photo1.jpg",
+  ],
+  team: [
+    // 例: "/images/articles/team/photo1.jpg",
+  ],
+  document: [
+    // 例: "/images/articles/document/photo1.jpg",
+  ],
+  work: [
+    // 例: "/images/articles/work/photo1.jpg",
+  ],
+};
+
+const UNSPLASH_FALLBACK: Record<string, string[]> = {
   office: [
     "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=70",
     "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&auto=format&fit=crop&q=70",
@@ -32,8 +67,10 @@ const IMAGES: Record<string, string[]> = {
 };
 
 export function resolveArticleImage(tag: string, index: number): string {
-  const bucket = IMAGES[tag] ?? IMAGES.office;
-  return bucket[index % bucket.length];
+  const local = LOCAL_IMAGES[tag] ?? [];
+  const fallback = UNSPLASH_FALLBACK[tag] ?? UNSPLASH_FALLBACK.office;
+  const pool = local.length > 0 ? local : fallback;
+  return pool[index % pool.length];
 }
 
 export const IMAGE_TAG_PATTERN = /^IMAGE:/;
