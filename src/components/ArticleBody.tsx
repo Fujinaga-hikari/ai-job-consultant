@@ -61,9 +61,16 @@ export default function ArticleBody({ content }: { content: string }) {
           },
           a({ href, children }) {
             if (href?.startsWith("cta:")) {
+              const handleCtaClick = () => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (window as any).gtag?.("event", "cta_click", {
+                  event_category: "article_inline",
+                  event_label: "inline_cta",
+                });
+              };
               return (
                 <span className="article-inline-cta-wrap">
-                  <a href="/#job-form" className="article-inline-cta">
+                  <a href="/#job-form" className="article-inline-cta" onClick={handleCtaClick}>
                     {children}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                       <path d="M5 12h14M12 5l7 7-7 7"/>

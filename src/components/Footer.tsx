@@ -21,6 +21,17 @@ export default function Footer() {
       </div>
       <div className="foot-copy">
         <span>© {new Date().getFullYear()} MixJob Inc. All rights reserved.</span>
+        <span style={{ fontSize: 11, color: "var(--ink-300)" }}>
+          Photos provided by{" "}
+          <a
+            href="https://www.pexels.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--ink-300)", textDecoration: "underline" }}
+          >
+            Pexels
+          </a>
+        </span>
       </div>
     </footer>
   );
