@@ -27,6 +27,24 @@ export async function generateMetadata({
     title: `${article.title} | MixJob`,
     description: article.metaDescription,
     alternates: { canonical: `/blog/${slug}` },
+    openGraph: {
+      title: `${article.title} | MixJob`,
+      description: article.metaDescription,
+      url: `${SITE_URL}/blog/${slug}`,
+      images: [
+        {
+          url: `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&keyword=${encodeURIComponent(article.keyword)}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [
+        `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&keyword=${encodeURIComponent(article.keyword)}`,
+      ],
+    },
   };
 }
 
