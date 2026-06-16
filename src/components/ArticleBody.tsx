@@ -1,7 +1,12 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import { resolveArticleImage, IMAGE_TAG_PATTERN } from "@/lib/article-images";
+
+function allowInternalSchemes(url: string): string {
+  if (url.startsWith("IMAGE:") || url.startsWith("cta:")) return url;
+  return defaultUrlTransform(url);
+}
 
 /** ## 見出しの直後に IMAGE: タグがなければ自動挿入する */
 function injectImages(content: string): string {
@@ -39,6 +44,7 @@ export default function ArticleBody({ content }: { content: string }) {
   return (
     <div className="article-content">
       <ReactMarkdown
+        urlTransform={allowInternalSchemes}
         components={{
           img({ src, alt }) {
             const srcStr = typeof src === "string" ? src : undefined;
