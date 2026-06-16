@@ -8,11 +8,7 @@ import ArticleBody from "@/components/ArticleBody";
 import { prisma } from "@/lib/prisma";
 
 export const revalidate = 3600;
-
-export async function generateStaticParams() {
-  const articles = await prisma.article.findMany({ select: { slug: true } });
-  return articles.map((a) => ({ slug: a.slug }));
-}
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
