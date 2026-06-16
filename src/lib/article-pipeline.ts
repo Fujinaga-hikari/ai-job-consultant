@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { generateSeoArticle, suggestArticleKeywords } from "@/lib/gemini";
 import { ARTICLE_KEYWORDS } from "@/lib/article-keywords";
-import { fetchPexelsImage } from "@/lib/pexels";
+import { fetchPexelsPhotos } from "@/lib/pexels";
 
 export type KeywordRow = {
   slug: string;
@@ -178,7 +178,9 @@ export async function generateArticleBySlug(slug: string) {
       entry.keyword,
       entry.titleHint,
     );
-    const coverImage = await fetchPexelsImage(entry.keyword).catch(() => null);
+    const photos = await fetchPexelsPhotos(entry.keyword, 5).catch(() => []);
+    const coverImage = photos.length > 0 ? photos[0].url : null;
+    const imagePool = photos.length > 0 ? JSON.stringify(photos) : null;
     await prisma.article.create({
       data: {
         slug: entry.slug,
@@ -187,6 +189,7 @@ export async function generateArticleBySlug(slug: string) {
         metaDescription,
         content,
         ...(coverImage ? { coverImage } : {}),
+        ...(imagePool ? { imagePool } : {}),
       },
     });
     await prisma.articleKeyword.update({

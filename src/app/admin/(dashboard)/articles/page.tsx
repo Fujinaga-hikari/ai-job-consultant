@@ -8,40 +8,37 @@ import BackfillImagesButton from "@/components/admin/BackfillImagesButton";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ブログ記事管理 | MixJob管理画面" };
 
-export default async function AdminArticlesPage() {
-  const [keywordRows, articles] = await Promise.all([
+const PER_PAGE = 20;
+
+export default async function AdminArticlesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageStr } = await searchParams;
+  const page = Math.max(1, parseInt(pageStr ?? "1", 10));
+
+  const [keywordRows, totalCount] = await Promise.all([
     listKeywordRows(),
-    prisma.article.findMany({ orderBy: { publishedAt: "desc" } }),
+    prisma.article.count(),
   ]);
 
-  const slugStats =
-    articles.length > 0
-      ? await Promise.all([
-          prisma.pageView.groupBy({
-            by: ["path"],
-            where: { path: { in: articles.map((a) => `/blog/${a.slug}`) } },
-            _count: { id: true },
-          }),
-          prisma.ctaClick.groupBy({
-            by: ["slug"],
-            where: { slug: { in: articles.map((a) => a.slug) } },
-            _count: { id: true },
-          }),
-        ])
-      : [[], []];
+  const articles = await prisma.article.findMany({
+    orderBy: { publishedAt: "desc" },
+    skip: (page - 1) * PER_PAGE,
+    take: PER_PAGE,
+    select: {
+      id: true,
+      slug: true,
+      keyword: true,
+      title: true,
+      publishedAt: true,
+      coverImage: true,
+      imagePool: true,
+    },
+  });
 
-  const pvBySlug = new Map(
-    (slugStats[0] as { path: string; _count: { id: number } }[]).map((r) => [
-      r.path.replace("/blog/", ""),
-      r._count.id,
-    ]),
-  );
-  const ctaBySlug = new Map(
-    (slugStats[1] as { slug: string; _count: { id: number } }[]).map((r) => [
-      r.slug,
-      r._count.id,
-    ]),
-  );
+  const totalPages = Math.ceil(totalCount / PER_PAGE);
 
   const pendingCount = keywordRows.filter(
     (k) => k.status === "pending" || k.status === "failed",
@@ -53,7 +50,7 @@ export default async function AdminArticlesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">ブログ記事</h1>
           <p className="text-sm text-gray-500 mt-1">
-            公開 {articles.length} 件 · 未生成キーワード {pendingCount} 件
+            公開 {totalCount} 件 · 未生成キーワード {pendingCount} 件
           </p>
         </div>
         <div className="flex items-center gap-4 flex-wrap">
@@ -68,12 +65,25 @@ export default async function AdminArticlesPage() {
         </div>
       </div>
 
+      {/* タブナビ */}
+      <div className="flex gap-1 border-b border-gray-200">
+        <span className="px-4 py-2 text-sm font-semibold text-[#e84730] border-b-2 border-[#e84730] -mb-px">
+          記事一覧
+        </span>
+        <Link
+          href="/admin/articles/stats"
+          className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+        >
+          パフォーマンス
+        </Link>
+      </div>
+
       <KeywordArticlePanel keywords={keywordRows} />
 
       {articles.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-            公開済み記事（パフォーマンス）
+            公開済み記事
           </h2>
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <table className="w-full text-sm">
@@ -81,17 +91,13 @@ export default async function AdminArticlesPage() {
                 <tr>
                   <th className="text-left px-5 py-3 font-medium">タイトル</th>
                   <th className="text-left px-4 py-3 font-medium">キーワード</th>
-                  <th className="text-right px-4 py-3 font-medium">PV</th>
-                  <th className="text-right px-4 py-3 font-medium">LP遷移</th>
-                  <th className="text-right px-4 py-3 font-medium">遷移率</th>
+                  <th className="text-center px-4 py-3 font-medium">画像</th>
                   <th className="text-left px-4 py-3 font-medium">公開日</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {articles.map((article) => {
-                  const pv = pvBySlug.get(article.slug) ?? 0;
-                  const cta = ctaBySlug.get(article.slug) ?? 0;
-                  const rate = pv > 0 ? `${((cta / pv) * 100).toFixed(1)}%` : "—";
+                  const hasImages = !!article.imagePool;
                   return (
                     <tr key={article.id} className="hover:bg-gray-50">
                       <td className="px-5 py-4 font-medium text-gray-800 max-w-xs">
@@ -109,11 +115,13 @@ export default async function AdminArticlesPage() {
                           {article.keyword}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-right tabular-nums text-gray-700">{pv}</td>
-                      <td className="px-4 py-4 text-right tabular-nums font-semibold text-green-600">
-                        {cta}
+                      <td className="px-4 py-4 text-center">
+                        {hasImages ? (
+                          <span className="text-green-600 text-xs font-semibold">✓ Pexels</span>
+                        ) : (
+                          <span className="text-gray-300 text-xs">未取得</span>
+                        )}
                       </td>
-                      <td className="px-4 py-4 text-right tabular-nums text-gray-500">{rate}</td>
                       <td className="px-4 py-4 text-gray-400 text-xs whitespace-nowrap">
                         {new Date(article.publishedAt).toLocaleDateString("ja-JP", {
                           year: "numeric",
@@ -127,6 +135,31 @@ export default async function AdminArticlesPage() {
               </tbody>
             </table>
           </div>
+
+          {/* ページネーション */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              {page > 1 && (
+                <Link
+                  href={`/admin/articles?page=${page - 1}`}
+                  className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  ← 前へ
+                </Link>
+              )}
+              <span className="text-sm text-gray-500">
+                {page} / {totalPages} ページ
+              </span>
+              {page < totalPages && (
+                <Link
+                  href={`/admin/articles?page=${page + 1}`}
+                  className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  次へ →
+                </Link>
+              )}
+            </div>
+          )}
         </section>
       )}
     </div>

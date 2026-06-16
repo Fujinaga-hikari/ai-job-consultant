@@ -3,12 +3,17 @@
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import { resolveArticleImage, IMAGE_TAG_PATTERN } from "@/lib/article-images";
 
+interface PexelsPhoto {
+  url: string;
+  photographer: string;
+  photographerUrl: string;
+}
+
 function allowInternalSchemes(url: string): string {
   if (url.startsWith("IMAGE:") || url.startsWith("cta:")) return url;
   return defaultUrlTransform(url);
 }
 
-/** ## 見出しの直後に IMAGE: タグがなければ自動挿入する */
 function injectImages(content: string): string {
   const lines = content.split("\n");
   const result: string[] = [];
@@ -18,7 +23,6 @@ function injectImages(content: string): string {
     result.push(lines[i]);
 
     if (/^## /.test(lines[i])) {
-      // 見出し直後の空行をスキップして次の実コンテンツ行を確認
       let j = i + 1;
       while (j < lines.length && lines[j].trim() === "") j++;
 
@@ -37,8 +41,24 @@ function injectImages(content: string): string {
   return result.join("\n");
 }
 
-export default function ArticleBody({ content }: { content: string }) {
+function parseImagePool(imagePool?: string | null): PexelsPhoto[] {
+  if (!imagePool) return [];
+  try {
+    return JSON.parse(imagePool) as PexelsPhoto[];
+  } catch {
+    return [];
+  }
+}
+
+export default function ArticleBody({
+  content,
+  imagePool,
+}: {
+  content: string;
+  imagePool?: string | null;
+}) {
   const processed = injectImages(content);
+  const pool = parseImagePool(imagePool);
   let imgIndex = 0;
 
   return (
@@ -49,15 +69,53 @@ export default function ArticleBody({ content }: { content: string }) {
           img({ src, alt }) {
             const srcStr = typeof src === "string" ? src : undefined;
             if (srcStr && IMAGE_TAG_PATTERN.test(srcStr)) {
-              const tag = srcStr.replace("IMAGE:", "").trim().toLowerCase();
-              const url = resolveArticleImage(tag, imgIndex++);
+              const idx = imgIndex++;
+              const photo = pool.length > 0 ? pool[idx % pool.length] : null;
+              const url = photo
+                ? photo.url
+                : resolveArticleImage(
+                    srcStr.replace("IMAGE:", "").trim().toLowerCase(),
+                    idx
+                  );
               return (
                 <span className="article-image-wrap">
-                  <img src={url} alt={alt ?? ""} className="article-image" loading="lazy" />
+                  <img
+                    src={url}
+                    alt={alt ?? ""}
+                    className="article-image"
+                    loading="lazy"
+                  />
+                  {photo && (
+                    <span className="article-image-credit">
+                      Photo by{" "}
+                      <a
+                        href={photo.photographerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {photo.photographer}
+                      </a>{" "}
+                      on{" "}
+                      <a
+                        href="https://www.pexels.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Pexels
+                      </a>
+                    </span>
+                  )}
                 </span>
               );
             }
-            return <img src={srcStr} alt={alt ?? ""} className="article-image" loading="lazy" />;
+            return (
+              <img
+                src={srcStr}
+                alt={alt ?? ""}
+                className="article-image"
+                loading="lazy"
+              />
+            );
           },
           a({ href, children }) {
             if (href?.startsWith("cta:")) {
@@ -70,16 +128,34 @@ export default function ArticleBody({ content }: { content: string }) {
               };
               return (
                 <span className="article-inline-cta-wrap">
-                  <a href="/#job-form" className="article-inline-cta" onClick={handleCtaClick}>
+                  <a
+                    href="/#job-form"
+                    className="article-inline-cta"
+                    onClick={handleCtaClick}
+                  >
                     {children}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                   </a>
                 </span>
               );
             }
-            return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+            return (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            );
           },
         }}
       >

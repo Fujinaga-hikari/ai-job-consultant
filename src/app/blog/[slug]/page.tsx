@@ -34,15 +34,15 @@ export async function generateMetadata({
       url: `${SITE_URL}/blog/${slug}`,
       images: [
         {
-          url: `${SITE_URL}${LOCAL_POOL[0]}`,
-          width: 800,
-          height: 534,
+          url: article.coverImage ?? `${SITE_URL}${LOCAL_POOL[0]}`,
+          width: 1200,
+          height: 627,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      images: [`${SITE_URL}${LOCAL_POOL[0]}`],
+      images: [article.coverImage ?? `${SITE_URL}${LOCAL_POOL[0]}`],
     },
   };
 }
@@ -139,7 +139,7 @@ export default async function ArticlePage({
               </p>
             </header>
 
-            <ArticleBody content={article.content} />
+            <ArticleBody content={article.content} imagePool={article.imagePool} />
             <ArticleAuthor />
           </article>
 

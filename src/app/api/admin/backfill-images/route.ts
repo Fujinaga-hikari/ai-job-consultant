@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchPexelsImage } from "@/lib/pexels";
+import { fetchPexelsPhotos } from "@/lib/pexels";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -11,14 +11,14 @@ function authorizeAdmin(request: NextRequest): boolean {
   return request.cookies.get("admin_session")?.value === adminToken;
 }
 
-/** coverImage が未設定の記事に Pexels 画像を一括割り当て */
+/** 全記事に Pexels 画像プールを一括割り当て（coverImage / imagePool が未設定のもの） */
 export async function POST(request: NextRequest) {
   if (!authorizeAdmin(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const articles = await prisma.article.findMany({
-    where: { coverImage: null },
+    where: { imagePool: null },
     select: { id: true, keyword: true },
   });
 
@@ -26,17 +26,19 @@ export async function POST(request: NextRequest) {
   let failed = 0;
 
   for (const article of articles) {
-    const url = await fetchPexelsImage(article.keyword).catch(() => null);
-    if (url) {
+    const photos = await fetchPexelsPhotos(article.keyword, 5).catch(() => []);
+    if (photos.length > 0) {
       await prisma.article.update({
         where: { id: article.id },
-        data: { coverImage: url },
+        data: {
+          imagePool: JSON.stringify(photos),
+          coverImage: photos[0].url,
+        },
       });
       updated++;
     } else {
       failed++;
     }
-    // Pexels レート制限を避けるため少し待つ
     await new Promise((r) => setTimeout(r, 300));
   }
 

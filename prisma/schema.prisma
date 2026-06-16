@@ -63,6 +63,7 @@ model Article {
   metaDescription String
   content         String
   coverImage      String?
+  imagePool       String?  // JSON: PexelsPhoto[]
   publishedAt     DateTime @default(now())
   createdAt       DateTime @default(now())
 

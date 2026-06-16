@@ -1072,6 +1072,14 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.7; }
   box-shadow: 0 2px 12px rgba(0,0,0,.08);
   object-fit: cover;
 }
+.article-image-credit {
+  display: block; margin-top: 6px;
+  font-size: 11px; color: var(--ink-300);
+  text-align: right;
+}
+.article-image-credit a {
+  color: var(--ink-300); text-decoration: underline;
+}
 
 /* ─── Article CTA ─── */
 .article-cta {
