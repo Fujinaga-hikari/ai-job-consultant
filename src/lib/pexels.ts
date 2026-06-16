@@ -18,10 +18,13 @@ export async function fetchPexelsPhotos(
   if (!key) return [];
 
   const query = buildQuery(keyword);
+  // キーワードのハッシュでページをずらし、記事ごとに異なる写真セットを取得する
+  const hash = kwHash(keyword);
+  const page = (hash % 8) + 1; // page 1〜8 をローテーション
 
   try {
     const res = await fetch(
-      `${PEXELS_API}?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`,
+      `${PEXELS_API}?query=${encodeURIComponent(query)}&per_page=${count}&page=${page}&orientation=landscape`,
       { headers: { Authorization: key } }
     );
     if (!res.ok) return [];
@@ -45,15 +48,14 @@ export async function fetchPexelsPhotos(
   }
 }
 
-/** 後方互換：coverImage 用に1枚だけ返す */
-export async function fetchPexelsImage(keyword: string): Promise<string | null> {
-  const photos = await fetchPexelsPhotos(keyword, 5);
-  if (photos.length === 0) return null;
-  const hash = [...keyword].reduce(
-    (h, c) => (h * 31 + c.charCodeAt(0)) & 0x7fffffff,
-    0
-  );
-  return photos[hash % photos.length].url;
+/** keyword のハッシュ値（カバー選択・ページ決定に使う） */
+export function kwHash(keyword: string): number {
+  return [...keyword].reduce((h, c) => (h * 31 + c.charCodeAt(0)) & 0x7fffffff, 0);
+}
+
+/** photos[] からキーワードハッシュで1枚選ぶ */
+export function pickCover(keyword: string, photos: PexelsPhoto[]): string {
+  return photos[kwHash(keyword) % photos.length].url;
 }
 
 function buildQuery(keyword: string): string {

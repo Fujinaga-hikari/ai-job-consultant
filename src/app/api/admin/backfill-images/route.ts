@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fetchPexelsPhotos } from "@/lib/pexels";
+import { fetchPexelsPhotos, pickCover } from "@/lib/pexels";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -11,14 +11,18 @@ function authorizeAdmin(request: NextRequest): boolean {
   return request.cookies.get("admin_session")?.value === adminToken;
 }
 
-/** 全記事に Pexels 画像プールを一括割り当て（coverImage / imagePool が未設定のもの） */
+/** 全記事の coverImage / imagePool を Pexels で上書き再取得 */
 export async function POST(request: NextRequest) {
   if (!authorizeAdmin(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // force=true のとき全件、デフォルトは imagePool 未設定のみ
+  const body = await request.json().catch(() => ({})) as { force?: boolean };
+  const force = body.force === true;
+
   const articles = await prisma.article.findMany({
-    where: { imagePool: null },
+    where: force ? {} : { imagePool: null },
     select: { id: true, keyword: true },
   });
 
@@ -32,7 +36,7 @@ export async function POST(request: NextRequest) {
         where: { id: article.id },
         data: {
           imagePool: JSON.stringify(photos),
-          coverImage: photos[0].url,
+          coverImage: pickCover(article.keyword, photos),
         },
       });
       updated++;
