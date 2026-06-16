@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { listKeywordRows } from "@/lib/article-pipeline";
 import KeywordArticlePanel from "@/components/admin/KeywordArticlePanel";
+import BackfillImagesButton from "@/components/admin/BackfillImagesButton";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ブログ記事管理 | MixJob管理画面" };
@@ -55,13 +56,16 @@ export default async function AdminArticlesPage() {
             公開 {articles.length} 件 · 未生成キーワード {pendingCount} 件
           </p>
         </div>
-        <Link
-          href="/blog"
-          target="_blank"
-          className="text-sm text-[#e84730] hover:underline"
-        >
-          公開ブログを見る →
-        </Link>
+        <div className="flex items-center gap-4 flex-wrap">
+          <BackfillImagesButton />
+          <Link
+            href="/blog"
+            target="_blank"
+            className="text-sm text-[#e84730] hover:underline"
+          >
+            公開ブログを見る →
+          </Link>
+        </div>
       </div>
 
       <KeywordArticlePanel keywords={keywordRows} />
