@@ -3,7 +3,37 @@
 import ReactMarkdown from "react-markdown";
 import { resolveArticleImage, IMAGE_TAG_PATTERN } from "@/lib/article-images";
 
+/** ## 見出しの直後に IMAGE: タグがなければ自動挿入する */
+function injectImages(content: string): string {
+  const lines = content.split("\n");
+  const result: string[] = [];
+  let imgIndex = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    result.push(lines[i]);
+
+    if (/^## /.test(lines[i])) {
+      // 見出し直後の空行をスキップして次の実コンテンツ行を確認
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() === "") j++;
+
+      const nextLine = lines[j] ?? "";
+      const hasImage = /!\[.*?\]\(IMAGE:/.test(nextLine);
+
+      if (!hasImage) {
+        const tags = ["work", "office", "meeting", "hiring", "team", "document"];
+        const tag = tags[imgIndex % tags.length];
+        result.push(`\n![](IMAGE:${tag})`);
+        imgIndex++;
+      }
+    }
+  }
+
+  return result.join("\n");
+}
+
 export default function ArticleBody({ content }: { content: string }) {
+  const processed = injectImages(content);
   let imgIndex = 0;
 
   return (
@@ -40,7 +70,7 @@ export default function ArticleBody({ content }: { content: string }) {
           },
         }}
       >
-        {content}
+        {processed}
       </ReactMarkdown>
     </div>
   );
