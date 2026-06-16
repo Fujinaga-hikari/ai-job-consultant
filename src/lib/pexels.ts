@@ -22,13 +22,12 @@ export async function fetchPexelsPhotos(
   const hash = kwHash(keyword);
   const page = (hash % 8) + 1; // page 1〜8 をローテーション
 
-  try {
+  const tryFetch = async (p: number) => {
     const res = await fetch(
-      `${PEXELS_API}?query=${encodeURIComponent(query)}&per_page=${count}&page=${page}&orientation=landscape`,
+      `${PEXELS_API}?query=${encodeURIComponent(query)}&per_page=${count}&page=${p}&orientation=landscape`,
       { headers: { Authorization: key } }
     );
-    if (!res.ok) return [];
-
+    if (!res.ok) return null;
     const data = (await res.json()) as {
       photos: Array<{
         src: { landscape: string };
@@ -36,13 +35,18 @@ export async function fetchPexelsPhotos(
         photographer_url: string;
       }>;
     };
-    if (!data.photos || data.photos.length === 0) return [];
-
-    return data.photos.map((p) => ({
-      url: p.src.landscape,
-      photographer: p.photographer,
-      photographerUrl: p.photographer_url,
+    if (!data.photos || data.photos.length === 0) return null;
+    return data.photos.map((ph) => ({
+      url: ph.src.landscape,
+      photographer: ph.photographer,
+      photographerUrl: ph.photographer_url,
     }));
+  };
+
+  try {
+    // まずハッシュページで試し、空なら page=1 にフォールバック
+    const photos = (await tryFetch(page)) ?? (page !== 1 ? await tryFetch(1) : null);
+    return photos ?? [];
   } catch {
     return [];
   }

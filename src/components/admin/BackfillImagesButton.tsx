@@ -44,9 +44,9 @@ export default function BackfillImagesButton() {
         全件上書き
       </button>
       {status === "done" && result && (
-        <span className="text-sm text-green-600 font-medium">
+        <span className={`text-sm font-medium ${result.updated > 0 ? "text-green-600" : "text-orange-500"}`}>
           完了 — {result.updated}件更新 / {result.total}件中
-          {result.failed > 0 && `（${result.failed}件スキップ）`}
+          {result.failed > 0 && ` · ${result.failed}件失敗`}
         </span>
       )}
       {status === "error" && (
