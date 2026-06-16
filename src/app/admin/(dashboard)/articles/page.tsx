@@ -8,7 +8,7 @@ import BackfillImagesButton from "@/components/admin/BackfillImagesButton";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "ブログ記事管理 | MixJob管理画面" };
 
-const PER_PAGE = 20;
+const PER_PAGE = 10;
 
 export default async function AdminArticlesPage({
   searchParams,
