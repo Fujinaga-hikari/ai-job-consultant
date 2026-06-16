@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { fetchPexelsPhotos, pickCover } from "@/lib/pexels";
 
@@ -45,6 +46,9 @@ export async function POST(request: NextRequest) {
     }
     await new Promise((r) => setTimeout(r, 300));
   }
+
+  // 画像URLが変わったのでブログ一覧・各記事のISRキャッシュを破棄
+  revalidatePath("/blog", "layout");
 
   return NextResponse.json({ ok: true, updated, failed, total: articles.length });
 }
