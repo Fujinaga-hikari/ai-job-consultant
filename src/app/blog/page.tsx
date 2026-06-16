@@ -23,6 +23,7 @@ export default async function BlogPage() {
       keyword: true,
       publishedAt: true,
       coverImage: true,
+      imagePool: true,
     },
   });
 
@@ -44,7 +45,10 @@ export default async function BlogPage() {
           ) : (
             <ul className="blog-card-list">
               {articles.map((article, index) => {
-                const cardImage = article.coverImage ?? LOCAL_POOL[index % LOCAL_POOL.length];
+                const poolFirst = article.imagePool
+                  ? (() => { try { return (JSON.parse(article.imagePool) as { url: string }[])[0]?.url; } catch { return undefined; } })()
+                  : undefined;
+                const cardImage = article.coverImage ?? poolFirst ?? LOCAL_POOL[index % LOCAL_POOL.length];
                 const dateStr = new Date(article.publishedAt).toLocaleDateString(
                   "ja-JP",
                   { year: "numeric", month: "long", day: "numeric" }
