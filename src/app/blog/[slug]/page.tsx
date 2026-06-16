@@ -9,6 +9,7 @@ import ArticleAuthor from "@/components/ArticleAuthor";
 import RelatedArticles from "@/components/RelatedArticles";
 import { prisma } from "@/lib/prisma";
 import { parseFaq } from "@/lib/article-faq";
+import { LOCAL_POOL } from "@/lib/article-images";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -33,17 +34,15 @@ export async function generateMetadata({
       url: `${SITE_URL}/blog/${slug}`,
       images: [
         {
-          url: `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&keyword=${encodeURIComponent(article.keyword)}`,
-          width: 1200,
-          height: 630,
+          url: `${SITE_URL}${LOCAL_POOL[0]}`,
+          width: 800,
+          height: 534,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      images: [
-        `${SITE_URL}/api/og?title=${encodeURIComponent(article.title)}&keyword=${encodeURIComponent(article.keyword)}`,
-      ],
+      images: [`${SITE_URL}${LOCAL_POOL[0]}`],
     },
   };
 }

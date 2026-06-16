@@ -9,7 +9,7 @@
  *   public/images/articles/ にファイルを置いて LOCAL_POOL にパスを追記するだけ。
  */
 
-const LOCAL_POOL: string[] = [
+export const LOCAL_POOL: string[] = [
   "/images/articles/pixta_117916914_S.jpg",
   "/images/articles/pixta_120396928_S.jpg",
   "/images/articles/pixta_125544925_S.jpg",

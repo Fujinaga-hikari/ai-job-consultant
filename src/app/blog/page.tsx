@@ -3,6 +3,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
+import { LOCAL_POOL } from "@/lib/article-images";
 
 export const revalidate = 3600;
 
@@ -41,8 +42,8 @@ export default async function BlogPage() {
             <p className="blog-empty">記事を準備中です。しばらくお待ちください。</p>
           ) : (
             <ul className="blog-card-list">
-              {articles.map((article) => {
-                const ogSrc = `/api/og?title=${encodeURIComponent(article.title)}&keyword=${encodeURIComponent(article.keyword)}`;
+              {articles.map((article, index) => {
+                const cardImage = LOCAL_POOL[index % LOCAL_POOL.length];
                 const dateStr = new Date(article.publishedAt).toLocaleDateString(
                   "ja-JP",
                   { year: "numeric", month: "long", day: "numeric" }
@@ -53,10 +54,10 @@ export default async function BlogPage() {
                       <div className="blog-card-thumb">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={ogSrc}
+                          src={cardImage}
                           alt=""
-                          width={1200}
-                          height={630}
+                          width={800}
+                          height={450}
                           loading="lazy"
                           className="blog-card-img"
                         />
