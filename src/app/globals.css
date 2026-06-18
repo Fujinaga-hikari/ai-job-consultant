@@ -737,7 +737,7 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.7; }
 /* ─── Static hero ─── */
 .hero-static {
   position: relative;
-  background: #fdf8f1 url('/images/articles/pixta_117916914_S_t.jpg') right center / cover no-repeat;
+  background: #fdf8f1 url('/images/articles/pixta_117916914_S_t.jpg') right center / auto 100% no-repeat;
   padding: 80px 48px 72px;
   border-bottom: 1px solid var(--gray-100);
   min-height: 520px;
@@ -749,7 +749,7 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.7; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, #fdf8f1 36%, rgba(253,248,241,0.88) 54%, rgba(253,248,241,0.25) 74%, transparent 100%);
+  background: linear-gradient(to right, #fdf8f1 34%, rgba(253,248,241,0.8) 50%, rgba(253,248,241,0.08) 65%, transparent 86%);
   pointer-events: none;
 }
 @media (max-width: 640px) {
