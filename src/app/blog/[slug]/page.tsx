@@ -161,7 +161,7 @@ export default async function ArticlePage({
           <RelatedArticles currentSlug={slug} />
         </div>
       </main>
-      <Footer />
+      <Footer showPexels />
     </div>
   );
 }

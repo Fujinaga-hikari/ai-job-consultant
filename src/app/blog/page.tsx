@@ -103,7 +103,7 @@ export default async function BlogPage() {
           )}
         </div>
       </main>
-      <Footer />
+      <Footer showPexels />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function Footer() {
+export default function Footer({ showPexels = false }: { showPexels?: boolean }) {
   return (
     <footer className="foot">
       <div className="foot-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
@@ -20,18 +20,20 @@ export default function Footer() {
         </div>
       </div>
       <div className="foot-copy">
-        <span>© {new Date().getFullYear()} MixJob Inc. All rights reserved.</span>
-        <span style={{ fontSize: 11, color: "var(--ink-300)" }}>
-          Photos provided by{" "}
-          <a
-            href="https://www.pexels.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "var(--ink-300)", textDecoration: "underline" }}
-          >
-            Pexels
-          </a>
-        </span>
+        <span>© {new Date().getFullYear()} MixJob. All rights reserved.</span>
+        {showPexels && (
+          <span style={{ fontSize: 11, color: "var(--ink-300)" }}>
+            Photos provided by{" "}
+            <a
+              href="https://www.pexels.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "var(--ink-300)", textDecoration: "underline" }}
+            >
+              Pexels
+            </a>
+          </span>
+        )}
       </div>
     </footer>
   );
