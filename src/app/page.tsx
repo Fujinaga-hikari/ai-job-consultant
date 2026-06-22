@@ -1,8 +1,27 @@
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HomeClient from "@/components/HomeClient";
+import { prisma } from "@/lib/prisma";
+import { LOCAL_POOL } from "@/lib/article-images";
 
-export default function Home() {
+export const revalidate = 3600;
+
+export default async function Home() {
+  const latestArticles = await prisma.article.findMany({
+    orderBy: { publishedAt: "desc" },
+    take: 3,
+    select: {
+      slug: true,
+      title: true,
+      metaDescription: true,
+      keyword: true,
+      publishedAt: true,
+      coverImage: true,
+      imagePool: true,
+    },
+  });
+
   return (
     <div className="screen">
       <Header />
@@ -66,6 +85,73 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Latest columns teaser */}
+      {latestArticles.length > 0 && (
+        <section className="home-columns">
+          <div className="home-columns-inner">
+            <div className="home-columns-head">
+              <div>
+                <p className="section-eyebrow">COLUMN</p>
+                <h2 className="benefits-title">採用に役立つコラム</h2>
+              </div>
+              <Link href="/blog" className="home-columns-more">
+                すべて見る
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+            <ul className="blog-card-list">
+              {latestArticles.map((article, index) => {
+                const poolFirst = article.imagePool
+                  ? (() => { try { return (JSON.parse(article.imagePool) as { url: string }[])[0]?.url; } catch { return undefined; } })()
+                  : undefined;
+                const cardImage = article.coverImage ?? poolFirst ?? LOCAL_POOL[index % LOCAL_POOL.length];
+                const dateStr = new Date(article.publishedAt).toLocaleDateString(
+                  "ja-JP",
+                  { year: "numeric", month: "long", day: "numeric" }
+                );
+                return (
+                  <li key={article.slug}>
+                    <Link href={`/blog/${article.slug}`} className="blog-card">
+                      <div className="blog-card-thumb">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={cardImage}
+                          alt=""
+                          width={800}
+                          height={450}
+                          loading="lazy"
+                          className="blog-card-img"
+                        />
+                      </div>
+                      <div className="blog-card-body">
+                        <div className="blog-card-meta">
+                          <span className="blog-card-keyword">{article.keyword}</span>
+                          <time className="blog-card-date">{dateStr}</time>
+                        </div>
+                        <h3 className="blog-card-title">{article.title}</h3>
+                        <p className="blog-card-desc">{article.metaDescription}</p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>

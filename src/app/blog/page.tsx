@@ -151,6 +151,21 @@ export default async function BlogPage({
               )}
             </>
           )}
+
+          {/* Service CTA */}
+          <div className="article-cta blog-list-cta">
+            <div className="article-cta-inner">
+              <p className="article-cta-eyebrow">無料で試す</p>
+              <h2 className="article-cta-title">AIが求人票を自動で作成します</h2>
+              <p className="article-cta-desc">
+                会社名・職種・業務内容を入力するだけで、応募者の心を掴む求人原稿を3分で生成。
+                採用のプロへの無料相談もついています。
+              </p>
+              <Link href="/" className="article-cta-btn">
+                無料で求人原稿を作成する
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
       <Footer showPexels />
