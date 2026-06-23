@@ -15,19 +15,28 @@ function authorizeCron(request: NextRequest): boolean {
   return request.headers.get("x-cron-secret") === secret;
 }
 
-// 毎日: キューを補充し、複数記事を生成（?bulk=true で上限10件）
+// 毎日: キューを補充し、記事を生成
+// ?count=N で生成本数を明示（1〜10）。?bulk=true は上限10件。
+// いずれも未指定なら ARTICLE_CRON_MAX_GENERATE（既定3）。
 export async function GET(request: NextRequest) {
   if (!authorizeCron(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const bulk = request.nextUrl.searchParams.get("bulk") === "true";
+  const params = request.nextUrl.searchParams;
+  const bulk = params.get("bulk") === "true";
   const cfg = getArticlePipelineConfig();
+
+  let maxGenerate = bulk ? 10 : cfg.cronMaxGenerate;
+  const countParam = Number(params.get("count"));
+  if (Number.isFinite(countParam) && countParam > 0) {
+    maxGenerate = Math.min(Math.floor(countParam), 10);
+  }
 
   try {
     const result = await runAutoArticlePipeline({
       minQueueSize: cfg.minQueueSize,
-      maxGenerate: bulk ? 10 : cfg.cronMaxGenerate,
+      maxGenerate,
     });
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
